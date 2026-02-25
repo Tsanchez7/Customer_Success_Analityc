@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV a Excel - Convertidor</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 { color: #1f2937; margin-bottom: 10px; }
+        .subtitle { color: #6b7280; margin-bottom: 30px; }
+        .step {
+            background: #f3f4f6;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #2563eb;
+        }
+        .button {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            margin: 10px 5px;
+            transition: all 0.3s;
+        }
+        .button:hover { transform: translateY(-2px); box-shadow: 0 20px 25px rgba(37, 99, 235, 0.4); }
+        .button:active { transform: translateY(0); }
+        .button.secondary {
+            background: #6b7280;
+        }
+        .button.secondary:hover {
+            box-shadow: 0 20px 25px rgba(107, 114, 128, 0.4);
+        }
+        .progress { margin: 20px 0; }
+        .log {
+            background: #1f2937;
+            color: #10b981;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        .log-line { margin: 5px 0; }
+        .success { color: #10b981; }
+        .error { color: #ef4444; }
+        .info { color: #3b82f6; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CSV a Excel (XLSX)</h1>
+        <p class="subtitle">Convertir archivos CSV a Excel nativo</p>
+
+        <div class="step">
+            <h3>1. Convertir CSVs a un archivo Excel</h3>
+            <p style="margin-bottom: 15px; color: #6b7280;">
+                Haz clic para convertir los 3 archivos CSV a un único archivo Excel (.xlsx):
+            </p>
+            <button class="button" onclick="convertirCSVsAExcel()">
+                Convertir CSV a XLSX
+            </button>
+        </div>
+
+        <div class="step">
+            <h3>2. O descargar Excel generado</h3>
+            <p style="margin-bottom: 15px; color: #6b7280;">
+                Si prefieres datos más completos:
+            </p>
+            <button class="button secondary" onclick="descargarExcelCompleto()">
+                Descargar Excel Completo
+            </button>
+        </div>
+
+        <div class="log" id="log"></div>
+    </div>
+
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+    <script>
+        let xlsxLoaded = false;
+
+        function log(message, type = 'info') {
+            const logEl = document.getElementById('log');
+            const line = document.createElement('div');
+            line.className = `log-line ${type}`;
+            line.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logEl.appendChild(line);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        function verificarYCargarXLSX() {
+            return new Promise((resolve) => {
+                if (typeof XLSX !== 'undefined') {
+                    xlsxLoaded = true;
+                    resolve(true);
+                } else {
+                    log('Cargando libreria SheetJS...', 'info');
+                    const script = document.createElement('script');
+                    script.src = 'https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js';
+                    script.onload = () => {
+                        xlsxLoaded = true;
+                        log('SheetJS cargado correctamente', 'success');
+                        resolve(true);
+                    };
+                    script.onerror = () => {
+                        log('Error al cargar SheetJS desde CDN', 'error');
+                        resolve(false);
+                    };
+                    document.head.appendChild(script);
+                }
+            });
+        }
+
+        async function convertirCSVsAExcel() {
+            try {
+                log('Iniciando conversion de CSVs a Excel...', 'info');
+
+                // Verificar y cargar XLSX si es necesario
+                const cargado = await verificarYCargarXLSX();
+                
+                if (!cargado || typeof XLSX === 'undefined') {
+                    log('ERROR: No se pudo cargar SheetJS', 'error');
+                    log('Intenta: 1) Recargar pagina (F5) 2) Verificar conexion a internet', 'error');
+                    return;
+                }
+
+                const wb = XLSX.utils.book_new();
+
+                // CSV 1: Accounts
+                const accountsCSV = `Account_ID,Account_Name,MRR_Current,ARR_Current,Renewal_Date,Total_Licenses,Active_Users,Product_Usage_Percentage,Open_Tickets,Avg_Resolution_Time,Last_Contact_Date
+ACC001,Empresa Tech SA,5000,60000,2026-04-20,100,85,78.5,2,2.5,2026-02-15
+ACC002,Digital Solutions Inc,8500,102000,2026-06-20,200,140,92,1,1.8,2026-02-18
+ACC003,Cloud Services Ltd,3200,38400,2026-03-22,75,45,55.3,5,4.2,2026-02-05
+ACC004,Innovation Labs,6800,81600,2026-05-20,150,120,88.7,3,3.1,2026-02-12
+ACC005,Global Ventures,4500,54000,2026-07-20,120,60,45.2,8,5.5,2025-12-06`;
+
+                const wsAccounts = XLSX.utils.aoa_to_sheet(
+                    accountsCSV.split('\n').map(row => row.split(','))
+                );
+                wsAccounts['!cols'] = Array(11).fill({ wch: 20 });
+                XLSX.utils.book_append_sheet(wb, wsAccounts, 'Accounts');
+                log('Sheet "Accounts" creada (5 cuentas)', 'success');
+
+                // CSV 2: Period_Data
+                const periodCSV = `Account_ID,Period,MRR_Starting,Expansion_Revenue,Contraction_Revenue,Churned_Revenue,Clients_Start_Period,Clients_Churned,Clients_Eligible_for_Renewal,Clients_Renewed
+ACC001,2025-Q4,4800,500,100,0,80,0,16,15
+ACC001,2026-Q1,5200,300,50,0,85,0,12,11
+ACC002,2025-Q4,8000,800,100,0,150,2,25,24
+ACC002,2026-Q1,8600,600,200,0,160,1,20,19
+ACC003,2025-Q4,3000,100,50,100,60,5,10,7
+ACC003,2026-Q1,3100,50,100,200,55,8,10,5
+ACC004,2025-Q4,6500,400,50,0,120,0,20,19
+ACC004,2026-Q1,6800,500,100,0,130,1,18,17
+ACC005,2025-Q4,4200,200,150,250,100,15,15,8
+ACC005,2026-Q1,4400,100,200,300,95,18,15,5`;
+
+                const wsPeriod = XLSX.utils.aoa_to_sheet(
+                    periodCSV.split('\n').map(row => row.split(','))
+                );
+                wsPeriod['!cols'] = Array(10).fill({ wch: 18 });
+                XLSX.utils.book_append_sheet(wb, wsPeriod, 'Period_Data');
+                log('Sheet "Period_Data" creada (10 registros)', 'success');
+
+                // CSV 3: NPS_Data
+                const npsCSV = `Account_ID,Period,NPS_Response
+ACC001,2025-Q4,9
+ACC001,2026-Q1,8
+ACC002,2025-Q4,10
+ACC002,2026-Q1,9
+ACC002,2026-Q1,9
+ACC003,2025-Q4,5
+ACC003,2026-Q1,6
+ACC004,2025-Q4,8
+ACC004,2026-Q1,8
+ACC004,2026-Q1,9
+ACC005,2025-Q4,4
+ACC005,2026-Q1,3
+ACC005,2026-Q1,5`;
+
+                const wsNPS = XLSX.utils.aoa_to_sheet(
+                    npsCSV.split('\n').map(row => row.split(','))
+                );
+                wsNPS['!cols'] = Array(3).fill({ wch: 18 });
+                XLSX.utils.book_append_sheet(wb, wsNPS, 'NPS_Data');
+                log('Sheet "NPS_Data" creada (13 respuestas)', 'success');
+
+                // Descargar
+                XLSX.writeFile(wb, 'datos_gestion_clientes.xlsx');
+                log('Archivo descargado: datos_gestion_clientes.xlsx', 'success');
+                log('Conversion completada exitosamente!', 'success');
+
+            } catch (error) {
+                log('ERROR: ' + error.message, 'error');
+                console.error(error);
+            }
+        }
+
+        async function descargarExcelCompleto() {
+            try {
+                log('Descargando Excel con datos completos...', 'info');
+                await convertirCSVsAExcel();
+            } catch (error) {
+                log('ERROR: ' + error.message, 'error');
+            }
+        }
+
+        // Verificar al cargar
+        window.addEventListener('load', async function() {
+            log('Pagina cargada', 'info');
+            
+            // Intentar cargar XLSX
+            setTimeout(async () => {
+                if (typeof XLSX === 'undefined') {
+                    log('SheetJS no detectado, intentando cargar...', 'info');
+                    const cargado = await verificarYCargarXLSX();
+                    if (cargado) {
+                        log('SheetJS cargado y listo para usar', 'success');
+                    } else {
+                        log('No se pudo cargar SheetJS - verifica tu conexion', 'error');
+                    }
+                } else {
+                    xlsxLoaded = true;
+                    log('SheetJS disponible y listo', 'success');
+                }
+            }, 500);
+        });
+    </script>
+</body>
+</html>

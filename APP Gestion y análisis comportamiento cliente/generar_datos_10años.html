@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Datos Históricos - 10 Años</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .generator-container {
+            background: white;
+            border-radius: 16px;
+            padding: 3rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #1f2937;
+            margin-bottom: 0.5rem;
+            font-size: 2rem;
+        }
+
+        .subtitle {
+            color: #6b7280;
+            margin-bottom: 2rem;
+            font-size: 1rem;
+        }
+
+        .info-box {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            border-radius: 8px;
+        }
+
+        .info-box h3 {
+            color: #1e40af;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-box ul {
+            margin-left: 1.5rem;
+            color: #1f2937;
+        }
+
+        .info-box li {
+            margin: 0.3rem 0;
+            font-size: 0.9rem;
+        }
+
+        .button {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .stat-card {
+            background: #f9fafb;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #3b82f6;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-top: 0.3rem;
+        }
+
+        .message {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            display: none;
+        }
+
+        .message.success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .message.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body>
+    <div class="generator-container">
+        <h1>📊 Generador de Datos Históricos</h1>
+        <p class="subtitle">Crea un dataset completo de 10 años (2016-2026)</p>
+
+        <div class="info-box">
+            <h3>📋 Datos que se generarán:</h3>
+            <ul>
+                <li><strong>7 cuentas</strong> con perfiles variados de riesgo</li>
+                <li><strong>40 trimestres</strong> de datos históricos (10 años)</li>
+                <li><strong>~400 registros</strong> en Period_Data</li>
+                <li><strong>~560 registros</strong> NPS (distribuidos trimestralmente)</li>
+                <li>Tendencias realistas de crecimiento/decrecimiento</li>
+                <li>Expansión, contracción y churn por período</li>
+            </ul>
+        </div>
+
+        <button class="button" onclick="generarExcelConHistorial()">
+            🚀 Generar Excel con 10 Años de Datos
+        </button>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value">40</div>
+                <div class="stat-label">Trimestres</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">~960</div>
+                <div class="stat-label">Registros Totales</div>
+            </div>
+        </div>
+
+        <div id="message" class="message"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        function generarExcelConHistorial() {
+            try {
+                showMessage('Generando datos históricos de 10 años...', 'info');
+
+                // 7 Cuentas con diferentes perfiles
+                const accounts = [
+                    {
+                        Account_ID: 'ACC001',
+                        Account_Name: 'TechCorp Enterprise',
+                        Industry: 'Technology',
+                        Total_Licenses: 500,
+                        Active_Users: 480,
+                        Product_Usage_Percentage: 92,
+                        CSM_Name: 'Ana García',
+                        Renewal_Date: '2026-12-31',
+                        Open_Tickets: 2,
+                        Avg_Resolution_Time_Days: 1.5,
+                        MRR_Current: 12000,
+                        ARR_Current: 144000,
+                        Contract_Length_Months: 36,
+                        healthLevel: 'excellent' // 85-95
+                    },
+                    {
+                        Account_ID: 'ACC002',
+                        Account_Name: 'Global Solutions Inc',
+                        Industry: 'Consulting',
+                        Total_Licenses: 300,
+                        Active_Users: 270,
+                        Product_Usage_Percentage: 88,
+                        CSM_Name: 'Carlos Ruiz',
+                        Renewal_Date: '2026-09-30',
+                        Open_Tickets: 1,
+                        Avg_Resolution_Time_Days: 2,
+                        MRR_Current: 7500,
+                        ARR_Current: 90000,
+                        Contract_Length_Months: 24,
+                        healthLevel: 'excellent' // 85-95
+                    },
+                    {
+                        Account_ID: 'ACC003',
+                        Account_Name: 'Innovate Systems',
+                        Industry: 'Software',
+                        Total_Licenses: 200,
+                        Active_Users: 150,
+                        Product_Usage_Percentage: 72,
+                        CSM_Name: 'María López',
+                        Renewal_Date: '2026-08-15',
+                        Open_Tickets: 4,
+                        Avg_Resolution_Time_Days: 5,
+                        MRR_Current: 4200,
+                        ARR_Current: 50400,
+                        Contract_Length_Months: 12,
+                        healthLevel: 'good' // 65-75
+                    },
+                    {
+                        Account_ID: 'ACC004',
+                        Account_Name: 'DataFlow Analytics',
+                        Industry: 'Analytics',
+                        Total_Licenses: 150,
+                        Active_Users: 135,
+                        Product_Usage_Percentage: 78,
+                        CSM_Name: 'Juan Martínez',
+                        Renewal_Date: '2026-11-30',
+                        Open_Tickets: 3,
+                        Avg_Resolution_Time_Days: 3,
+                        MRR_Current: 3800,
+                        ARR_Current: 45600,
+                        Contract_Length_Months: 24,
+                        healthLevel: 'good' // 65-75
+                    },
+                    {
+                        Account_ID: 'ACC005',
+                        Account_Name: 'CloudNet Services',
+                        Industry: 'Cloud',
+                        Total_Licenses: 100,
+                        Active_Users: 55,
+                        Product_Usage_Percentage: 48,
+                        CSM_Name: 'Laura Sánchez',
+                        Renewal_Date: '2026-06-30',
+                        Open_Tickets: 8,
+                        Avg_Resolution_Time_Days: 7,
+                        MRR_Current: 2800,
+                        ARR_Current: 33600,
+                        Contract_Length_Months: 12,
+                        healthLevel: 'at-risk' // 45-55
+                    },
+                    {
+                        Account_ID: 'ACC006',
+                        Account_Name: 'Legacy Corp',
+                        Industry: 'Manufacturing',
+                        Total_Licenses: 80,
+                        Active_Users: 42,
+                        Product_Usage_Percentage: 42,
+                        CSM_Name: 'Pedro Torres',
+                        Renewal_Date: '2026-03-31',
+                        Open_Tickets: 10,
+                        Avg_Resolution_Time_Days: 10,
+                        MRR_Current: 2100,
+                        ARR_Current: 25200,
+                        Contract_Length_Months: 12,
+                        healthLevel: 'at-risk' // 45-55
+                    },
+                    {
+                        Account_ID: 'ACC007',
+                        Account_Name: 'StartupX',
+                        Industry: 'Startup',
+                        Total_Licenses: 50,
+                        Active_Users: 18,
+                        Product_Usage_Percentage: 28,
+                        CSM_Name: 'Sofia Reyes',
+                        Renewal_Date: '2026-02-28',
+                        Open_Tickets: 15,
+                        Avg_Resolution_Time_Days: 12,
+                        MRR_Current: 1200,
+                        ARR_Current: 14400,
+                        Contract_Length_Months: 6,
+                        healthLevel: 'critical' // 25-35
+                    }
+                ];
+
+                // Configuración de tendencias por cuenta
+                const trendsConfig = {
+                    'ACC001': { growthRate: 1.035, volatility: 0.02, npsBase: 75 }, // Excellent
+                    'ACC002': { growthRate: 1.032, volatility: 0.025, npsBase: 70 }, // Excellent
+                    'ACC003': { growthRate: 1.025, volatility: 0.03, npsBase: 45 }, // Good
+                    'ACC004': { growthRate: 1.028, volatility: 0.028, npsBase: 50 }, // Good
+                    'ACC005': { growthRate: 1.01, volatility: 0.05, npsBase: 20 }, // At-risk
+                    'ACC006': { growthRate: 1.005, volatility: 0.06, npsBase: 15 }, // At-risk
+                    'ACC007': { growthRate: 0.998, volatility: 0.08, npsBase: -10 } // Critical
+                };
+
+                // Generar Period_Data (40 trimestres: 2016-Q1 a 2026-Q1)
+                const periodData = [];
+                const startYear = 2016;
+                const endYear = 2026;
+
+                for (let year = startYear; year <= endYear; year++) {
+                    const quarters = year === endYear ? 1 : 4; // Solo Q1 para 2026
+                    
+                    for (let quarter = 1; quarter <= quarters; quarter++) {
+                        accounts.forEach(account => {
+                            const config = trendsConfig[account.Account_ID];
+                            const quarterIndex = (year - startYear) * 4 + quarter - 1;
+                            
+                            // Calcular MRR con tendencia
+                            const baseMRR = account.MRR_Current / Math.pow(config.growthRate, (endYear - startYear) * 4);
+                            const randomFactor = 1 + (Math.random() - 0.5) * config.volatility;
+                            const mrrForPeriod = baseMRR * Math.pow(config.growthRate, quarterIndex) * randomFactor;
+                            
+                            // Clientes (crecimiento más lento)
+                            const baseClients = Math.floor(account.Total_Licenses / 10);
+                            const clientGrowth = 1 + (config.growthRate - 1) / 2;
+                            const clientsStart = Math.floor(baseClients * Math.pow(clientGrowth, quarterIndex));
+                            
+                            // Expansión y contracción basados en health
+                            let expansion = 0;
+                            let contraction = 0;
+                            let churn = 0;
+                            
+                            if (account.healthLevel === 'excellent') {
+                                expansion = mrrForPeriod * (0.03 + Math.random() * 0.05);
+                                contraction = mrrForPeriod * (Math.random() * 0.01);
+                                churn = Math.random() < 0.05 ? 1 : 0;
+                            } else if (account.healthLevel === 'good') {
+                                expansion = mrrForPeriod * (0.01 + Math.random() * 0.03);
+                                contraction = mrrForPeriod * (Math.random() * 0.02);
+                                churn = Math.random() < 0.08 ? 1 : 0;
+                            } else if (account.healthLevel === 'at-risk') {
+                                expansion = mrrForPeriod * (Math.random() * 0.01);
+                                contraction = mrrForPeriod * (0.02 + Math.random() * 0.04);
+                                churn = Math.random() < 0.12 ? Math.floor(Math.random() * 2) + 1 : 0;
+                            } else { // critical
+                                expansion = 0;
+                                contraction = mrrForPeriod * (0.05 + Math.random() * 0.08);
+                                churn = Math.random() < 0.2 ? Math.floor(Math.random() * 3) + 1 : 0;
+                            }
+                            
+                            const clientsChurned = churn;
+                            const clientsEnd = clientsStart - clientsChurned;
+                            const clientsEligible = Math.floor(clientsStart * 0.25); // 25% renovables cada trimestre
+                            const renewalRate = account.healthLevel === 'excellent' ? 0.95 :
+                                              account.healthLevel === 'good' ? 0.85 :
+                                              account.healthLevel === 'at-risk' ? 0.7 : 0.5;
+                            const clientsRenewed = Math.floor(clientsEligible * renewalRate);
+                            
+                            periodData.push({
+                                Account_ID: account.Account_ID,
+                                Period: `${year}-Q${quarter}`,
+                                MRR_Starting: Math.round(mrrForPeriod),
+                                Expansion_Revenue: Math.round(expansion),
+                                Contraction_Revenue: Math.round(contraction),
+                                Churned_Revenue: Math.round(churn > 0 ? mrrForPeriod * 0.1 * churn : 0),
+                                Clients_Start_Period: clientsStart,
+                                Clients_End_Period: clientsEnd,
+                                Clients_Churned: clientsChurned,
+                                Clients_Eligible_for_Renewal: clientsEligible,
+                                Clients_Renewed: clientsRenewed
+                            });
+                        });
+                    }
+                }
+
+                // Generar NPS_Data (~2 respuestas por cuenta por trimestre)
+                const npsData = [];
+                for (let year = startYear; year <= endYear; year++) {
+                    const quarters = year === endYear ? 1 : 4;
+                    
+                    for (let quarter = 1; quarter <= quarters; quarter++) {
+                        accounts.forEach(account => {
+                            const config = trendsConfig[account.Account_ID];
+                            const responsesPerQuarter = Math.floor(Math.random() * 2) + 1; // 1-2 respuestas
+                            
+                            for (let i = 0; i < responsesPerQuarter; i++) {
+                                let npsScore;
+                                
+                                if (account.healthLevel === 'excellent') {
+                                    npsScore = Math.floor(Math.random() * 2) + 9; // 9-10
+                                } else if (account.healthLevel === 'good') {
+                                    npsScore = Math.floor(Math.random() * 3) + 7; // 7-9
+                                } else if (account.healthLevel === 'at-risk') {
+                                    npsScore = Math.floor(Math.random() * 4) + 4; // 4-7
+                                } else { // critical
+                                    npsScore = Math.floor(Math.random() * 5); // 0-4
+                                }
+                                
+                                npsData.push({
+                                    Account_ID: account.Account_ID,
+                                    Period: `${year}-Q${quarter}`,
+                                    NPS_Response: npsScore
+                                });
+                            }
+                        });
+                    }
+                }
+
+                // Crear libro de Excel
+                const wb = XLSX.utils.book_new();
+
+                // Hoja 1: Accounts
+                const wsAccounts = XLSX.utils.json_to_sheet(accounts);
+                XLSX.utils.book_append_sheet(wb, wsAccounts, 'Accounts');
+
+                // Hoja 2: Period_Data
+                const wsPeriod = XLSX.utils.json_to_sheet(periodData);
+                XLSX.utils.book_append_sheet(wb, wsPeriod, 'Period_Data');
+
+                // Hoja 3: NPS_Data
+                const wsNPS = XLSX.utils.json_to_sheet(npsData);
+                XLSX.utils.book_append_sheet(wb, wsNPS, 'NPS_Data');
+
+                // Descargar archivo
+                XLSX.writeFile(wb, 'datos_historicos_10años.xlsx');
+
+                showMessage(`✅ Excel generado exitosamente con ${periodData.length} registros de período y ${npsData.length} respuestas NPS`, 'success');
+
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('❌ Error al generar el archivo: ' + error.message, 'error');
+            }
+        }
+
+        function showMessage(text, type) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.className = `message ${type}`;
+            messageEl.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

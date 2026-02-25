@@ -1,0 +1,309 @@
+/* ===== SISTEMA DE AYUDA Y TOOLTIPS ===== */
+
+/* Botón de ayuda flotante */
+.help-button {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    border-radius: 50%;
+    border: none;
+    color: white;
+    font-size: 1.8rem;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.help-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+}
+
+.help-button:active {
+    transform: scale(0.95);
+}
+
+/* Panel de ayuda */
+.help-panel {
+    position: fixed;
+    top: 0;
+    right: -450px;
+    width: 450px;
+    height: 100vh;
+    background: white;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+    transition: right 0.3s ease;
+    z-index: 1001;
+    overflow-y: auto;
+}
+
+.help-panel.open {
+    right: 0;
+}
+
+.help-panel-header {
+    position: sticky;
+    top: 0;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+}
+
+.help-panel-header h2 {
+    margin: 0;
+    font-size: 1.3rem;
+}
+
+.help-close-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.help-close-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.help-panel-content {
+    padding: 2rem;
+}
+
+.help-section {
+    margin-bottom: 2rem;
+}
+
+.help-section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.help-metric {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: #f9fafb;
+    border-radius: 8px;
+    border-left: 4px solid #3b82f6;
+}
+
+.help-metric-name {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #3b82f6;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.help-metric-icon {
+    font-size: 1.2rem;
+}
+
+.help-metric-full {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+    font-style: italic;
+}
+
+.help-metric-description {
+    font-size: 0.9rem;
+    color: #374151;
+    line-height: 1.6;
+    margin-bottom: 0.5rem;
+}
+
+.help-metric-example {
+    font-size: 0.85rem;
+    color: #059669;
+    background: #d1fae5;
+    padding: 0.5rem;
+    border-radius: 6px;
+    margin-top: 0.5rem;
+}
+
+.help-metric-example strong {
+    color: #065f46;
+}
+
+.help-metric-interpretation {
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background: white;
+    border-radius: 6px;
+}
+
+.help-metric-interpretation ul {
+    margin: 0.5rem 0 0 1.2rem;
+    padding: 0;
+}
+
+.help-metric-interpretation li {
+    margin: 0.3rem 0;
+}
+
+.help-tip {
+    background: #fef3c7;
+    border-left: 4px solid #f59e0b;
+    padding: 1rem;
+    border-radius: 6px;
+    margin-top: 1rem;
+}
+
+.help-tip-title {
+    font-weight: 600;
+    color: #92400e;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.help-tip-content {
+    font-size: 0.9rem;
+    color: #78350f;
+    line-height: 1.5;
+}
+
+/* Tooltips inline */
+.info-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: help;
+    margin-left: 0.3rem;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.info-icon:hover {
+    background: #3b82f6;
+    color: white;
+    transform: scale(1.15);
+}
+
+/* Tooltip dinámico con JavaScript */
+.dynamic-tooltip {
+    position: fixed;
+    background: #1f2937;
+    color: white;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 400;
+    line-height: 1.4;
+    max-width: 280px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 999999;
+    pointer-events: none;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.dynamic-tooltip.visible {
+    opacity: 1;
+}
+
+/* Tooltips CSS deshabilitados - usando JS */
+.info-icon::after {
+    display: none;
+}
+
+.info-icon::before {
+    display: none;
+}
+
+.info-icon:hover::after {
+    display: none;
+}
+
+.info-icon:hover::before {
+    display: none;
+}
+
+/* Overlay cuando el panel está abierto */
+.help-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 1000;
+}
+
+.help-overlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .help-panel {
+        width: 100%;
+        right: -100%;
+    }
+    
+    .help-button {
+        bottom: 1rem;
+        right: 1rem;
+        width: 50px;
+        height: 50px;
+        font-size: 1.5rem;
+    }
+    
+    .info-icon::after {
+        max-width: 200px;
+        font-size: 0.8rem;
+    }
+}
+
+/* Sección de descripción de métrica en KPI cards */
+.kpi-info {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-top: 0.5rem;
+    line-height: 1.4;
+    font-weight: 400;
+}
+
+.kpi-card .kpi-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+}

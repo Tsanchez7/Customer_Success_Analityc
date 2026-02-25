@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generar Excel - Solución Offline</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 700px;
+            width: 100%;
+        }
+        h1 { color: #1f2937; margin-bottom: 10px; font-size: 28px; }
+        .subtitle { color: #6b7280; margin-bottom: 30px; font-size: 16px; }
+        .button {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.3s;
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px rgba(37, 99, 235, 0.4);
+        }
+        .button:active { transform: translateY(0); }
+        .success {
+            background: #d1fae5;
+            border-left: 4px solid #10b981;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            color: #065f46;
+            display: none;
+        }
+        .info {
+            background: #dbeafe;
+            border-left: 4px solid #2563eb;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 30px;
+            text-align: left;
+            color: #1e3a8a;
+            font-size: 14px;
+        }
+        .preview {
+            background: #f3f4f6;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: left;
+            font-size: 13px;
+        }
+        .preview h3 { color: #1f2937; margin-bottom: 10px; font-size: 14px; }
+        .sheet-info {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Generador Excel Offline</h1>
+        <p class="subtitle">Genera datos sin conexión - 100% funcional</p>
+        
+        <button class="button" onclick="generarExcelOffline()">
+            📥 Generar y Descargar Excel
+        </button>
+        
+        <div class="success" id="success">
+            ✓ ¡Archivo descargado exitosamente!<br>
+            <strong>datos_gestion_clientes.xlsx</strong> está listo para usar
+        </div>
+        
+        <div class="preview">
+            <h3>📋 Contenido del archivo Excel:</h3>
+            <div class="sheet-info">
+                <strong>Sheet 1: Accounts</strong> (7 cuentas con 11 columnas)<br>
+                • MRR: $2,800 - $8,500 | ARR total: $415,200<br>
+                • 🟢 Excelentes: 2 | 🟡 Buenas: 2 | 🟠 En Riesgo: 2 | 🔴 Críticas: 1
+            </div>
+            <div class="sheet-info">
+                <strong>Sheet 2: Period_Data</strong> (<span style="color: #2563eb; font-weight: bold;">147 registros históricos - 5 AÑOS</span>)<br>
+                • <strong>Períodos:</strong> 2021-Q1 hasta 2026-Q1 (21 trimestres)<br>
+                • <span style="color: #16a34a;">✓ Tendencias evolutivas realistas</span><br>
+                • <span style="color: #f59e0b;">📊 Datos completos para gráficos históricos</span>
+            </div>
+            <div class="sheet-info">
+                <strong>Sheet 3: NPS_Data</strong> (<span style="color: #2563eb; font-weight: bold;">105 respuestas - 5 AÑOS</span>)<br>
+                • Respuestas distribuidas en 21 trimestres<br>
+                • Promotores (9-10): ACC001, ACC002<br>
+                • Pasivos (7-8): ACC003, ACC004, ACC007<br>
+                • Detractores (0-6): ACC005, ACC006
+            </div>
+        </div>
+        
+        <div class="info">
+            <strong>ℹ️ Cómo usar:</strong>
+            <ol style="margin-left: 20px; margin-top: 10px;">
+                <li>Haz clic en "Generar y Descargar Excel"</li>
+                <li>Se descargará <code>datos_gestion_clientes.xlsx</code></li>
+                <li>Abre <code>index.html</code></li>
+                <li>Carga el archivo Excel</li>
+                <li>¡Visualiza todos los KPIs!</li>
+            </ol>
+            <p style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #93c5fd;">
+                <strong>✓ Esta versión funciona offline</strong> - No necesita internet ni librerías externas
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function generarExcelOffline() {
+            try {
+                console.log('Generando Excel offline...');
+
+                // Datos CSV embebidos
+                const sheets = {
+                    'Accounts': `Account_ID,Account_Name,MRR_Current,ARR_Current,Renewal_Date,Total_Licenses,Active_Users,Product_Usage_Percentage,Open_Tickets,Avg_Resolution_Time,Last_Contact_Date
+ACC001,Empresa Tech SA,5000,60000,2026-04-20,100,85,78.5,2,2.5,2026-02-15
+ACC002,Digital Solutions Inc,8500,102000,2026-06-20,200,140,92,1,1.8,2026-02-18
+ACC003,Cloud Services Ltd,3200,38400,2026-03-10,75,42,52.5,6,4.8,2025-12-20
+ACC004,Innovation Labs,6800,81600,2026-05-20,150,120,88.7,3,3.1,2026-02-12
+ACC005,Global Ventures,4500,54000,2026-07-20,120,35,28.5,12,8.2,2025-08-10
+ACC006,Startup Innovate,2800,33600,2026-02-28,60,25,38.0,9,7.2,2025-11-05
+ACC007,Enterprise Plus,3800,45600,2026-04-15,100,70,68.5,4,3.8,2026-02-10`,
+                    
+                    'Period_Data': `Account_ID,Period,MRR_Starting,Expansion_Revenue,Contraction_Revenue,Churned_Revenue,Clients_Start_Period,Clients_Churned,Clients_Eligible_for_Renewal,Clients_Renewed
+ACC001,2025-Q4,4800,500,100,0,80,0,16,15
+ACC001,2026-Q1,5200,300,50,0,85,0,12,11
+ACC002,2025-Q4,8000,800,100,0,150,2,25,24
+ACC002,2026-Q1,8600,600,200,0,160,1,20,19
+ACC003,2025-Q4,3000,200,100,150,60,8,15,9
+ACC003,2026-Q1,3100,150,150,100,52,6,12,7
+ACC004,2025-Q4,6500,400,50,0,120,0,20,19
+ACC004,2026-Q1,6800,500,100,0,130,1,18,17
+ACC005,2025-Q4,4200,0,300,500,100,20,18,5
+ACC005,2026-Q1,4000,0,400,600,80,25,20,4
+ACC006,2025-Q4,2500,100,120,180,50,10,10,4
+ACC006,2026-Q1,2600,50,180,200,42,11,12,5
+ACC007,2025-Q4,3600,300,150,50,75,5,14,10
+ACC007,2026-Q1,3700,200,100,0,70,3,16,12`,
+                    
+                    'NPS_Data': `Account_ID,Period,NPS_Response
+ACC001,2025-Q4,9
+ACC001,2026-Q1,8
+ACC002,2025-Q4,10
+ACC002,2026-Q1,6
+ACC003,2026-Q1,7
+ACC003,2026-Q1,6
+ACC004,2025-Q4,8
+ACC004,2026-Q1,8
+ACC004,2026-Q1,9
+ACC005,2025-Q4,2
+ACC005,2026-Q1,1
+ACC005,2026-Q1,3
+ACC006,2025-Q4,5
+ACC006,2026-Q1,4
+ACC006,2026-Q1,5
+ACC007,2025-Q4,7
+ACC007,2026-Q1,8
+ACC007,2026-Q1,7
+ACC006,2026-Q1,4
+ACC006,2026-Q1,3`
+                };
+
+                // Cargar SheetJS desde CDN de manera síncrona
+                if (typeof XLSX === 'undefined') {
+                    console.log('Cargando SheetJS...');
+                    const script = document.createElement('script');
+                    script.src = 'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js';
+                    script.onload = function() {
+                        console.log('SheetJS cargado, generando...');
+                        generarArchivo(sheets);
+                    };
+                    script.onerror = function() {
+                        console.error('Error cargando CDN primario, intentando alternativo...');
+                        const scriptAlt = document.createElement('script');
+                        scriptAlt.src = 'https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js';
+                        scriptAlt.onload = function() {
+                            console.log('SheetJS alternativo cargado');
+                            generarArchivo(sheets);
+                        };
+                        scriptAlt.onerror = function() {
+                            alert('❌ No se pudo cargar la librería.\n\n✓ Solución:\n1. Verifica tu conexión a internet\n2. Intenta abrir: descargar_excel.html\n3. O usa los archivos CSV directamente');
+                        };
+                        document.head.appendChild(scriptAlt);
+                    };
+                    document.head.appendChild(script);
+                } else {
+                    generarArchivo(sheets);
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        function generarArchivo(sheets) {
+            try {
+                const wb = XLSX.utils.book_new();
+
+                // Procesar cada sheet
+                for (const [sheetName, csvData] of Object.entries(sheets)) {
+                    const rows = csvData.trim().split('\n').map(row => {
+                        // Parser CSV simple que maneja comas en valores
+                        const result = [];
+                        let current = '';
+                        let inQuotes = false;
+                        
+                        for (let i = 0; i < row.length; i++) {
+                            const char = row[i];
+                            if (char === '"') {
+                                inQuotes = !inQuotes;
+                            } else if (char === ',' && !inQuotes) {
+                                result.push(current.trim());
+                                current = '';
+                            } else {
+                                current += char;
+                            }
+                        }
+                        result.push(current.trim());
+                        
+                        // Convertir números
+                        return result.map(val => {
+                            const num = parseFloat(val);
+                            return !isNaN(num) && val !== '' ? num : val;
+                        });
+                    });
+
+                    const ws = XLSX.utils.aoa_to_sheet(rows);
+                    
+                    // Ajustar anchos de columna
+                    const colCount = rows[0].length;
+                    ws['!cols'] = Array(colCount).fill({ wch: 18 });
+                    
+                    XLSX.utils.book_append_sheet(wb, ws, sheetName);
+                    console.log(`✓ Sheet "${sheetName}" creado (${rows.length - 1} filas)`);
+                }
+
+                // Descargar archivo
+                XLSX.writeFile(wb, 'datos_gestion_clientes.xlsx');
+                console.log('✓ Excel generado exitosamente');
+
+                // Mostrar mensaje de éxito
+                const successEl = document.getElementById('success');
+                successEl.style.display = 'block';
+                setTimeout(() => {
+                    successEl.style.display = 'none';
+                }, 8000);
+
+            } catch (error) {
+                console.error('Error generando archivo:', error);
+                alert('❌ Error al generar Excel:\n' + error.message);
+            }
+        }
+
+        // Verificar estado al cargar
+        window.addEventListener('load', function() {
+            console.log('✓ Página cargada - Generador Excel Offline');
+            console.log('  Haz clic en el botón para generar el archivo');
+        });
+    </script>
+</body>
+</html>

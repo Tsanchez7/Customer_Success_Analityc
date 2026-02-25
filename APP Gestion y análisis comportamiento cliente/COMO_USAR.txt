@@ -1,0 +1,91 @@
+═══════════════════════════════════════════════════════════
+  INSTRUCCIONES RÁPIDAS - Dashboard de Gestión de Cuentas
+═══════════════════════════════════════════════════════════
+
+📋 CÓMO USAR LA APLICACIÓN:
+
+PASO 1: Generar el archivo Excel con datos de prueba
+────────────────────────────────────────────────────
+1. Abre el archivo: generar_excel_offline.html
+2. Haz clic en: "Generar y Descargar Excel"
+3. Se descargará: datos_gestion_clientes.xlsx
+4. Guárdalo en tu carpeta de Descargas o donde prefieras
+
+
+PASO 2: Cargar el Excel en el Dashboard
+────────────────────────────────────────
+1. Abre el archivo: index.html
+2. Espera 2-3 segundos a que cargue la librería*
+3. Haz clic en: "📁 Cargar Excel"
+4. Selecciona: datos_gestion_clientes.xlsx
+5. ¡Los KPIs se mostrarán automáticamente!
+
+
+📊 KPIs QUE VERÁS:
+──────────────────
+✓ MRR (Monthly Recurring Revenue)
+✓ ARR (Annual Recurring Revenue)  
+✓ NRR (Net Revenue Retention)
+✓ Churn Rate (Tasa de abandono)
+✓ NPS (Net Promoter Score)
+✓ Revenue at Risk (Ingresos en riesgo)
+
++ Tabla con análisis detallado de cada cuenta:
+  - Health Score (puntuación de salud)
+  - MRR individual
+  - Adoption Rate (tasa de adopción)
+  - Fecha de renovación
+  - Nivel de riesgo
+
+
+🔧 SOLUCIÓN DE PROBLEMAS:
+─────────────────────────
+
+❌ "No se pudo cargar la librería"
+   → Verifica tu conexión a internet
+   → Recarga la página (F5)
+   → Espera 3-5 segundos antes de cargar el Excel
+
+❌ "SheetJS no está disponible"
+   → Espera 2-3 segundos después de abrir index.html
+   → Intenta cargar el Excel nuevamente
+   → Si persiste, recarga la página (F5)
+
+❌ El botón "Generar Excel" no funciona
+   → Verifica conexión a internet (necesaria para SheetJS)
+   → Intenta: descargar_excel.html (alternativa)
+   → O usa los archivos CSV incluidos
+
+
+📁 ARCHIVOS INCLUIDOS:
+──────────────────────
+• index.html ...................... Dashboard principal
+• generar_excel_offline.html ...... Generador de datos Excel
+• descargar_excel.html ............ Alternativa para generar Excel
+• csv_a_excel.html ................ Convertir CSV a Excel
+• style.css ....................... Estilos del dashboard
+• script.js ....................... Lógica de cálculo de KPIs
+• Accounts.csv .................... Datos de cuentas (backup)
+• Period_Data.csv ................. Datos de períodos (backup)
+• NPS_Data.csv .................... Datos NPS (backup)
+
+
+💡 NOTAS IMPORTANTES:
+─────────────────────
+* La aplicación necesita conexión a internet LA PRIMERA VEZ
+  que abres index.html para cargar la librería SheetJS.
+  
+* El archivo Excel debe tener 3 hojas:
+  - Accounts (datos de cuentas)
+  - Period_Data (datos de períodos)
+  - NPS_Data (respuestas NPS)
+
+* Todos los archivos deben estar en la MISMA CARPETA
+
+* La aplicación funciona 100% en local (no necesita servidor)
+
+
+═══════════════════════════════════════════════════════════
+¿PREGUNTAS? Verifica la consola del navegador (F12) para
+ver mensajes de depuración.
+═══════════════════════════════════════════════════════════

@@ -1,0 +1,137 @@
+🚀 INICIO RÁPIDO - Dashboard de Gestión de Cuentas
+
+═════════════════════════════════════════════════════════════════
+
+🎯 PASO 1: Descarga datos de ejemplo
+├─ Abre en navegador: generar_datos.html
+├─ Haz clic en "📥 Descargar Excel de Ejemplo"
+└─ Se guardará: datos_ejemplo.xlsx
+
+📊 PASO 2: Abre el Dashboard
+├─ Abre en navegador: index.html
+└─ ¡Ya verás la interfaz lista!
+
+📁 PASO 3: Carga tu Excel
+├─ Haz clic en "📁 Cargar Excel"
+├─ Selecciona tu archivo .xlsx
+└─ ¡Espera a que se procese!
+
+✅ PASO 4: Explora los resultados
+├─ Panel superior: 6 KPIs globales
+├─ Panel inferior: Tabla con cuentas
+├─ Colores = Nivel de riesgo
+└─ ¡Listo para analizar!
+
+═════════════════════════════════════════════════════════════════
+
+📋 REQUISITOS DEL EXCEL
+
+Tu archivo Excel DEBE tener estas 3 hojas exactamente:
+
+1. Accounts
+   └─ Columnas: Account_ID, Account_Name, MRR_Current, ARR_Current,
+      Renewal_Date, Total_Licenses, Active_Users, 
+      Product_Usage_Percentage, Open_Tickets,
+      Avg_Resolution_Time, Last_Contact_Date
+
+2. Period_Data
+   └─ Columnas: Account_ID, Period, MRR_Starting,
+      Expansion_Revenue, Contraction_Revenue, Churned_Revenue,
+      Clients_Start_Period, Clients_Churned,
+      Clients_Eligible_for_Renewal, Clients_Renewed
+
+3. NPS_Data
+   └─ Columnas: Account_ID, Period, NPS_Response (0-10)
+
+═════════════════════════════════════════════════════════════════
+
+📊 KPIs QUE VERÁS
+
+Global (Tarjetas superiores):
+├─ MRR: Ingresos mensuales totales
+├─ ARR: Ingresos anuales (MRR × 12)
+├─ NRR: Retención neta
+├─ Churn Rate: % de pérdida
+├─ NPS: Net Promoter Score
+└─ Revenue at Risk: Ingresos en riesgo
+
+Por Cuenta (Tabla):
+├─ Nombre de la cuenta
+├─ Health Score (0-100%)
+├─ MRR actual
+├─ Adoption Rate (%)
+├─ Fecha de renovación
+└─ Nivel de riesgo
+
+═════════════════════════════════════════════════════════════════
+
+🎨 COLORES Y SIGNIFICADO
+
+Health Score:
+  🟢 Verde (≥85%): Excelente
+  🟡 Verde claro (70-84%): Bueno
+  🟠 Naranja (50-69%): Advertencia
+  🔴 Rojo (<50%): Crítico
+
+Nivel de Riesgo:
+  ✓ Bajo: Todo en orden
+  ⚠ Medio: Monitorear
+  ⚠ Alto: Atención requerida
+  🔴 Crítico: Acción inmediata
+
+═════════════════════════════════════════════════════════════════
+
+🔧 ARCHIVOS DE LA APP
+
+index.html         ← ABRE ESTO para el dashboard
+generar_datos.html ← Para generar Excel de ejemplo
+style.css          ← Estilos (no tocar)
+script.js          ← Lógica de cálculos (no tocar)
+readme.md          ← Documentación (leer)
+README_GUIA.md     ← Guía completa (consultar)
+
+═════════════════════════════════════════════════════════════════
+
+❓ PROBLEMAS COMUNES
+
+❌ "No se encontraron datos en Accounts"
+   → Revisa que el Excel tenga la hoja exactamente nombrada "Accounts"
+
+❌ No se carga el archivo
+   → Intenta abrir generar_datos.html primero para descargar ejemplo
+
+❌ Cifras en 0
+   → Verifica que los números estén en columnas correctas
+
+❌ Fechas no se muestran
+   → Usa formato YYYY-MM-DD en Excel
+
+❌ El dashboard se ve vacío
+   → Recarga la página (F5) e intenta otra vez
+
+═════════════════════════════════════════════════════════════════
+
+✨ CARACTERÍSTICAS
+
+✅ Sin instalaciones necesarias
+✅ Sin backend
+✅ Sin frameworks
+✅ Todo en local (seguro)
+✅ Interfaz moderna
+✅ Responsive (mobile-friendly)
+✅ Cálculos automáticos
+
+═════════════════════════════════════════════════════════════════
+
+👉 ¡COMIENZA AHORA!
+
+1. Abre generar_datos.html en tu navegador
+2. Descarga el Excel de ejemplo
+3. Abre index.html
+4. Carga el Excel
+5. ¡Analiza los resultados!
+
+═════════════════════════════════════════════════════════════════
+
+Versión 1.0 • Febrero 2026
+Desarrollado con HTML, CSS y JavaScript puro

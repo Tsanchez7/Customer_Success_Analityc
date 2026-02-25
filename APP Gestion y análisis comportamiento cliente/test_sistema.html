@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Verificar Sistema</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a2e;
+            color: #0f0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #16213e;
+            padding: 30px;
+            border: 2px solid #0f0;
+            border-radius: 8px;
+        }
+        h1 {
+            color: #0f0;
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px #0f0;
+        }
+        .test-section {
+            background: #0f1620;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #0f0;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            background: #1a1a2e;
+        }
+        .success { color: #0f0; }
+        .error { color: #f00; }
+        .warning { color: #ff0; }
+        .info { color: #0ff; }
+        button {
+            background: #0f0;
+            color: #000;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 10px 5px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        button:hover {
+            background: #0f0;
+            box-shadow: 0 0 20px #0f0;
+        }
+        pre {
+            background: #000;
+            padding: 10px;
+            overflow-x: auto;
+            color: #0f0;
+            margin: 10px 0;
+        }
+        .status {
+            display: inline-block;
+            padding: 5px 10px;
+            margin-left: 10px;
+            border-radius: 4px;
+        }
+        .status.ok { background: #0f0; color: #000; }
+        .status.fail { background: #f00; color: #fff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 DIAGNÓSTICO DEL SISTEMA</h1>
+        
+        <div class="test-section">
+            <h3>📊 Test 1: Verificar SheetJS</h3>
+            <button onclick="testSheetJS()">Ejecutar Test</button>
+            <div id="test1Result" class="test-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📁 Test 2: Generar Excel de Prueba</h3>
+            <button onclick="testGenerateExcel()">Generar Excel</button>
+            <div id="test2Result" class="test-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔄 Test 3: Simular Carga de Datos</h3>
+            <button onclick="testDataParsing()">Simular Carga</button>
+            <div id="test3Result" class="test-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📋 Información del Navegador</h3>
+            <div id="browserInfo" class="test-result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>💡 Instrucciones</h3>
+            <div class="info">
+                <p>1. Ejecuta el Test 1 para verificar que SheetJS se carga correctamente</p>
+                <p>2. Ejecuta el Test 2 para generar un archivo Excel de prueba</p>
+                <p>3. Abre index.html y carga el archivo generado</p>
+                <p>4. Si algo falla, copia la información de esta página y reporta el error</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mostrar info del navegador
+        document.getElementById('browserInfo').innerHTML = `
+            <div class="info">
+                <strong>Navegador:</strong> ${navigator.userAgent}<br>
+                <strong>Plataforma:</strong> ${navigator.platform}<br>
+                <strong>Idioma:</strong> ${navigator.language}
+            </div>
+        `;
+
+        // Test 1: Verificar SheetJS
+        function testSheetJS() {
+            const resultDiv = document.getElementById('test1Result');
+            resultDiv.innerHTML = '<span class="warning">⏳ Cargando SheetJS...</span>';
+
+            if (typeof XLSX !== 'undefined') {
+                resultDiv.innerHTML = `
+                    <span class="success">✓ SheetJS ya está cargado</span><br>
+                    <span class="info">Versión: ${XLSX.version || 'Desconocida'}</span>
+                `;
+                return;
+            }
+
+            const cdns = [
+                'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js',
+                'https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js',
+                'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'
+            ];
+
+            let attempt = 0;
+
+            function tryLoad() {
+                if (attempt >= cdns.length) {
+                    resultDiv.innerHTML = '<span class="error">✗ No se pudo cargar SheetJS desde ningún CDN</span><br><span class="warning">Verifica tu conexión a internet</span>';
+                    return;
+                }
+
+                resultDiv.innerHTML = `<span class="warning">⏳ Intentando CDN ${attempt + 1}/${cdns.length}...</span>`;
+
+                const script = document.createElement('script');
+                script.src = cdns[attempt];
+
+                script.onload = function() {
+                    resultDiv.innerHTML = `
+                        <span class="success">✓ SheetJS cargado correctamente desde CDN ${attempt + 1}</span><br>
+                        <span class="info">URL: ${cdns[attempt]}</span><br>
+                        <span class="info">Versión: ${XLSX.version || 'Desconocida'}</span>
+                        <span class="status ok">OK</span>
+                    `;
+                };
+
+                script.onerror = function() {
+                    attempt++;
+                    tryLoad();
+                };
+
+                document.head.appendChild(script);
+            }
+
+            tryLoad();
+        }
+
+        // Test 2: Generar Excel
+        function testGenerateExcel() {
+            const resultDiv = document.getElementById('test2Result');
+
+            if (typeof XLSX === 'undefined') {
+                resultDiv.innerHTML = '<span class="error">✗ Primero ejecuta el Test 1 para cargar SheetJS</span>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<span class="warning">⏳ Generando Excel...</span>';
+
+            try {
+                const wb = XLSX.utils.book_new();
+
+                // Datos de prueba
+                const accountsData = [
+                    ['Account_ID', 'Account_Name', 'MRR_Current', 'ARR_Current', 'Renewal_Date', 'Total_Licenses', 'Active_Users', 'Product_Usage_Percentage', 'Open_Tickets', 'Avg_Resolution_Time', 'Last_Contact_Date'],
+                    ['ACC001', 'Empresa Tech SA', 5000, 60000, '2026-04-20', 100, 85, 78.5, 2, 2.5, '2026-02-15'],
+                    ['ACC002', 'Digital Solutions Inc', 8500, 102000, '2026-06-20', 200, 140, 92, 1, 1.8, '2026-02-18'],
+                    ['ACC003', 'Cloud Services Ltd', 3200, 38400, '2026-03-22', 75, 45, 55.3, 5, 4.2, '2026-02-05'],
+                    ['ACC004', 'Innovation Labs', 6800, 81600, '2026-05-20', 150, 120, 88.7, 3, 3.1, '2026-02-12'],
+                    ['ACC005', 'Global Ventures', 4500, 54000, '2026-07-20', 120, 60, 45.2, 8, 5.5, '2025-12-06']
+                ];
+
+                const periodData = [
+                    ['Account_ID', 'Period', 'MRR_Starting', 'Expansion_Revenue', 'Contraction_Revenue', 'Churned_Revenue', 'Clients_Start_Period', 'Clients_Churned', 'Clients_Eligible_for_Renewal', 'Clients_Renewed'],
+                    ['ACC001', '2025-Q4', 4800, 500, 100, 0, 80, 0, 16, 15],
+                    ['ACC001', '2026-Q1', 5200, 300, 50, 0, 85, 0, 12, 11],
+                    ['ACC002', '2025-Q4', 8000, 800, 100, 0, 150, 2, 25, 24],
+                    ['ACC002', '2026-Q1', 8600, 600, 200, 0, 160, 1, 20, 19],
+                    ['ACC003', '2025-Q4', 3000, 100, 50, 100, 60, 5, 10, 7],
+                    ['ACC003', '2026-Q1', 3100, 50, 100, 200, 55, 8, 10, 5],
+                    ['ACC004', '2025-Q4', 6500, 400, 50, 0, 120, 0, 20, 19],
+                    ['ACC004', '2026-Q1', 6800, 500, 100, 0, 130, 1, 18, 17],
+                    ['ACC005', '2025-Q4', 4200, 200, 150, 250, 100, 15, 15, 8],
+                    ['ACC005', '2026-Q1', 4400, 100, 200, 300, 95, 18, 15, 5]
+                ];
+
+                const npsData = [
+                    ['Account_ID', 'Period', 'NPS_Response'],
+                    ['ACC001', '2025-Q4', 9],
+                    ['ACC001', '2026-Q1', 8],
+                    ['ACC002', '2025-Q4', 10],
+                    ['ACC002', '2026-Q1', 9],
+                    ['ACC002', '2026-Q1', 9],
+                    ['ACC003', '2025-Q4', 5],
+                    ['ACC003', '2026-Q1', 6],
+                    ['ACC004', '2025-Q4', 8],
+                    ['ACC004', '2026-Q1', 8],
+                    ['ACC004', '2026-Q1', 9],
+                    ['ACC005', '2025-Q4', 4],
+                    ['ACC005', '2026-Q1', 3],
+                    ['ACC005', '2026-Q1', 5]
+                ];
+
+                // Crear hojas
+                const wsAccounts = XLSX.utils.aoa_to_sheet(accountsData);
+                const wsPeriod = XLSX.utils.aoa_to_sheet(periodData);
+                const wsNPS = XLSX.utils.aoa_to_sheet(npsData);
+
+                // Ajustar anchos
+                wsAccounts['!cols'] = Array(11).fill({ wch: 18 });
+                wsPeriod['!cols'] = Array(10).fill({ wch: 18 });
+                wsNPS['!cols'] = Array(3).fill({ wch: 18 });
+
+                XLSX.utils.book_append_sheet(wb, wsAccounts, 'Accounts');
+                XLSX.utils.book_append_sheet(wb, wsPeriod, 'Period_Data');
+                XLSX.utils.book_append_sheet(wb, wsNPS, 'NPS_Data');
+
+                // Descargar
+                XLSX.writeFile(wb, 'TEST_datos_gestion_clientes.xlsx');
+
+                resultDiv.innerHTML = `
+                    <span class="success">✓ Excel generado correctamente</span><br>
+                    <span class="info">Archivo: TEST_datos_gestion_clientes.xlsx</span><br>
+                    <span class="info">3 hojas creadas: Accounts (5), Period_Data (10), NPS_Data (13)</span>
+                    <span class="status ok">OK</span><br><br>
+                    <strong>Ahora abre index.html y carga este archivo</strong>
+                `;
+
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <span class="error">✗ Error al generar Excel:</span><br>
+                    <span class="error">${error.message}</span>
+                    <span class="status fail">ERROR</span>
+                `;
+                console.error(error);
+            }
+        }
+
+        // Test 3: Simular parsing de datos
+        function testDataParsing() {
+            const resultDiv = document.getElementById('test3Result');
+
+            if (typeof XLSX === 'undefined') {
+                resultDiv.innerHTML = '<span class="error">✗ Primero ejecuta el Test 1 para cargar SheetJS</span>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<span class="warning">⏳ Simulando carga de datos...</span>';
+
+            try {
+                // Crear workbook de prueba
+                const wb = XLSX.utils.book_new();
+
+                const accountsData = [
+                    ['Account_ID', 'Account_Name', 'MRR_Current'],
+                    ['ACC001', 'Test Account', 5000]
+                ];
+
+                const ws = XLSX.utils.aoa_to_sheet(accountsData);
+                XLSX.utils.book_append_sheet(wb, ws, 'Accounts');
+
+                // Leer los datos
+                const data = XLSX.utils.sheet_to_json(ws);
+
+                resultDiv.innerHTML = `
+                    <span class="success">✓ Parsing de datos exitoso</span><br>
+                    <span class="info">Datos leídos:</span>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                    <span class="status ok">OK</span>
+                `;
+
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <span class="error">✗ Error en el parsing:</span><br>
+                    <span class="error">${error.message}</span>
+                    <span class="status fail">ERROR</span>
+                `;
+                console.error(error);
+            }
+        }
+
+        // Auto-ejecutar test 1 al cargar
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                testSheetJS();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

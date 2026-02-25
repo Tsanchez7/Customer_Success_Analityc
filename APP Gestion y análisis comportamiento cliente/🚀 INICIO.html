@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 INICIO - Dashboard de Gestión</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #1f2937;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 36px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #6b7280;
+            margin-bottom: 40px;
+            font-size: 18px;
+        }
+        .step {
+            background: #f3f4f6;
+            padding: 25px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 6px solid #2563eb;
+            position: relative;
+        }
+        .step-number {
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: #2563eb;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .step h3 {
+            color: #1f2937;
+            margin-bottom: 15px;
+            margin-top: 10px;
+        }
+        .step p {
+            color: #4b5563;
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+        .button {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px 10px 10px 0;
+            transition: all 0.3s;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4);
+        }
+        .button.secondary {
+            background: #10b981;
+        }
+        .button.secondary:hover {
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+        }
+        .alert {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+            color: #92400e;
+        }
+        .success-box {
+            background: #d1fae5;
+            border-left: 4px solid #10b981;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+            color: #065f46;
+        }
+        .code {
+            background: #1f2937;
+            color: #10b981;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        ul {
+            margin: 15px 0 15px 30px;
+        }
+        li {
+            margin: 8px 0;
+            color: #4b5563;
+        }
+        .files-list {
+            background: #1f2937;
+            color: #10b981;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Dashboard de Gestión de Cuentas</h1>
+        <p class="subtitle">Guía paso a paso para comenzar</p>
+
+        <div class="alert">
+            <strong>⚡ IMPORTANTE:</strong> Necesitas conexión a internet la primera vez para cargar las librerías del sistema.
+        </div>
+
+        <div class="step">
+            <div class="step-number">1</div>
+            <h3>📊 Genera el archivo Excel con datos de prueba</h3>
+            <p>Primero necesitas crear un archivo Excel con datos de ejemplo para probar el dashboard.</p>
+            <a href="test_sistema.html" class="button">🔍 Verificar Sistema Primero</a>
+            <a href="generar_excel_offline.html" class="button secondary">📥 Generar Excel</a>
+            <p style="margin-top: 15px;">
+                <strong>¿Qué hace?</strong> Genera un archivo llamado <span class="code">datos_gestion_clientes.xlsx</span> 
+                con 5 cuentas de ejemplo y todos los datos necesarios.
+            </p>
+        </div>
+
+        <div class="step">
+            <div class="step-number">2</div>
+            <h3>⏳ Espera la descarga del archivo</h3>
+            <p>El archivo se descargará automáticamente a tu carpeta de Descargas:</p>
+            <ul>
+                <li>Nombre: <span class="code">datos_gestion_clientes.xlsx</span></li>
+                <li>Tamaño: ~8-10 KB</li>
+                <li>3 hojas: Accounts, Period_Data, NPS_Data</li>
+            </ul>
+        </div>
+
+        <div class="step">
+            <div class="step-number">3</div>
+            <h3>📂 Abre el Dashboard Principal</h3>
+            <p>Ahora abre el archivo principal del dashboard:</p>
+            <a href="index.html" class="button">🎯 Abrir Dashboard</a>
+            <p style="margin-top: 15px;">
+                <strong>⏰ IMPORTANTE:</strong> Espera 2-3 segundos después de abrir la página para que 
+                el sistema cargue la librería SheetJS. Verás el mensaje:
+            </p>
+            <div class="success-box">
+                ✓ Sistema listo - Carga tu archivo Excel
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-number">4</div>
+            <h3>📁 Carga el archivo Excel</h3>
+            <p>En el dashboard:</p>
+            <ul>
+                <li>Haz clic en el botón <strong>"📁 Cargar Excel"</strong></li>
+                <li>Selecciona el archivo <span class="code">datos_gestion_clientes.xlsx</span></li>
+                <li>¡El dashboard se actualizará automáticamente!</li>
+            </ul>
+        </div>
+
+        <div class="step">
+            <div class="step-number">5</div>
+            <h3>🎉 ¡Disfruta de tus KPIs!</h3>
+            <p>Verás los siguientes indicadores:</p>
+            <ul>
+                <li><strong>MRR:</strong> $27,000 - Ingresos Recurrentes Mensuales</li>
+                <li><strong>ARR:</strong> $336,000 - Ingresos Recurrentes Anuales</li>
+                <li><strong>NRR:</strong> Tasa de Retención Neta</li>
+                <li><strong>Churn Rate:</strong> Tasa de abandono de clientes</li>
+                <li><strong>NPS:</strong> Net Promoter Score</li>
+                <li><strong>Revenue at Risk:</strong> Ingresos en riesgo</li>
+            </ul>
+            <p>Más una tabla detallada con el análisis de cada cuenta individual.</p>
+        </div>
+
+        <div class="alert">
+            <strong>❌ ¿Problemas?</strong>
+            <ul style="margin-top: 10px;">
+                <li>Si el botón "Generar Excel" no funciona → Verifica tu conexión a internet</li>
+               <li>Si dice "Esperando que la librería se cargue" → Espera 3-5 segundos y reintenta</li>
+                <li>Si no se visualizan los KPIs → Abre la consola del navegador (F12) y copia los errores</li>
+                <li>Si persiste → Usa <span class="code">test_sistema.html</span> para diagnosticar el problema</li>
+            </ul>
+        </div>
+
+        <div style="margin-top: 40px; padding-top: 20px; border-top: 2px solid #e5e7eb;">
+            <h3 style="color: #1f2937; margin-bottom: 15px;">📁 Archivos del Proyecto</h3>
+            <div class="files-list">
+🚀 INICIO.html .................. Esta página (guía de inicio)<br>
+🔍 test_sistema.html ............ Diagnóstico y verificación<br>
+📊 index.html ................... Dashboard principal<br>
+📥 generar_excel_offline.html ... Generador de datos Excel<br>
+<br>
+📄 COMO_USAR.txt ................ Instrucciones en texto<br>
+📋 Accounts.csv ................. Backup CSV (opcional)<br>
+📋 Period_Data.csv .............. Backup CSV (opcional)<br>
+📋 NPS_Data.csv ................. Backup CSV (opcional)
+            </div>
+        </div>
+
+        <div class="success-box" style="margin-top: 30px; text-align: center; font-size: 18px;">
+            <strong>✨ ¡Todo listo para empezar!</strong><br>
+            <span style="font-size: 14px;">Sigue los pasos y tendrás tu dashboard funcionando en menos de 2 minutos</span>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,266 @@
+✅ CHECKLIST DE VALIDACIÓN DEL PROYECTO
+═════════════════════════════════════════════════════════════════════════
+
+📋 PASO 1: Verifica que existan todos los archivos
+
+Ubicación: c:\Users\CursosTardes\Desktop\APP Gestion y análisis comportamiento cliente\
+
+Archivos REQUERIDOS:
+  ☐ index.html                (Dashboard principal)
+  ☐ style.css                 (Estilos CSS)
+  ☐ script.js                 (Lógica JavaScript)
+  ☐ generar_datos.html        (Generador de Excel)
+
+Archivos OPCIONALES (pero recomendados):
+  ☐ readme.md                 (Documentación)
+  ☐ README_GUIA.md            (Guía completa)
+  ☐ INSTRUCCIONES.txt         (Inicio rápido)
+  ☐ ESTRUCTURA.txt            (Este archivo)
+
+═════════════════════════════════════════════════════════════════════════
+
+🧪 PASO 2: Validación Técnica
+
+Contenido en index.html:
+  ☐ <!DOCTYPE html>
+  ☐ <link rel="stylesheet" href="style.css">
+  ☐ <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js"></script>
+  ☐ <script src="script.js"></script>
+  ☐ <input type="file" id="fileInput" accept=".xlsx">
+  ☐ ID elementos: #mrrValue, #arrValue, #nrrValue, #churnValue, #npsValue, #revenueAtRiskValue
+  ☐ Tabla con id="accountsTableBody"
+
+Contenido en style.css:
+  ☐ Variables CSS definidas (:root)
+  ☐ Clases .kpi-card
+  ☐ Clases .accounts-table
+  ☐ Media queries (@media)
+  ☐ Colores de riesgo (.health-score, .risk-level)
+
+Contenido en script.js:
+  ☐ Función handleFileUpload()
+  ☐ Función calculateMRR()
+  ☐ Función calculateNRR()
+  ☐ Función calculateHealthScore()
+  ☐ Función renderDashboard()
+  ☐ Función renderAccountsTable()
+  ☐ Event listener para #fileInput
+  ☐ Event listener para #clearData
+
+═════════════════════════════════════════════════════════════════════════
+
+🌐 PASO 3: Prueba en Navegador
+
+Requisitos previos:
+  ☐ Navegador actualizado instalado (Chrome, Firefox, Safari, Edge)
+  ☐ Conexión a Internet (para SheetJS)
+
+Pruebas básicas:
+
+  1️⃣  CARGAR PÁGINA
+      ├─ Abre index.html en navegador
+      ├─ ✓ Deberías ver el header con "Dashboard de Gestión..."
+      ├─ ✓ Deberías ver botón "📁 Cargar Excel"
+      ├─ ✓ Deberías ver mensaje "Carga un archivo Excel para comenzar"
+      ├─ ✓ Deberías ver estado "Conexión OK" en consola (F12)
+      └─ ✓ NO deberías ver errores en consola (F12)
+
+  2️⃣  GENERAR DATOS DE EJEMPLO
+      ├─ Abre generar_datos.html
+      ├─ ✓ Deberías ver botón "📥 Descargar Excel de Ejemplo"
+      ├─ Haz clic en el botón
+      ├─ ✓ Se descargará archivo "datos_ejemplo.xlsx"
+      ├─ ✓ Verás mensaje de confirmación
+      └─ ✓ NO deberías ver errores en consola
+
+  3️⃣  CARGAR EXCEL EN DASHBOARD
+      ├─ Vuelve a index.html
+      ├─ Haz clic en "📁 Cargar Excel"
+      ├─ Selecciona "datos_ejemplo.xlsx"
+      ├─ ✓ Verás mensaje "Cargando archivo..."
+      ├─ ✓ Después: "Archivo cargado correctamente ✓"
+      ├─ ✓ Aparecerá panel de KPIs
+      ├─ ✓ Aparecerá tabla de cuentas
+      └─ ✓ NO deberías ver errores en consola
+
+  4️⃣  VALIDAR KPIS CARGADOS
+      ├─ MRR (debe ser > 0)              ☐
+      ├─ ARR (debe ser MRR × 12)         ☐
+      ├─ NRR (debe estar entre 0-200%)   ☐
+      ├─ Churn Rate (debe ser 0-100%)    ☐
+      ├─ NPS (debe estar entre -100 a 100) ☐
+      ├─ Revenue at Risk (debe ser > 0)  ☐
+      └─ Adoption Rate (debe ser 0-100%) ☐
+
+  5️⃣  VALIDAR TABLA DE CUENTAS
+      ├─ ✓ Debería haber 5 filas de datos
+      ├─ ✓ Cada fila tiene: Nombre, Health Score, MRR, Adoption, Fecha, Riesgo
+      ├─ ✓ Health Score tiene color (verde, naranja o rojo)
+      ├─ ✓ Nivel de riesgo muestra correctamente
+      └─ ✓ Datos coinciden con Excel cargado
+
+  6️⃣  VALIDAR COLORES Y ESTILOS
+      ├─ ✓ Interfaz tiene fondo degradado
+      ├─ ✓ Tarjetas KPI tienen sombra
+      ├─ ✓ Tabla está bien formateada
+      ├─ ✓ Health Score > 70 aparece en verde
+      ├─ ✓ Health Score < 50 aparece en rojo
+      ├─ ✓ Botones tienen efectos hover
+      └─ ✓ Responsive en móvil (prueba con F12 device mode)
+
+═════════════════════════════════════════════════════════════════════════
+
+🔢 PASO 4: Validar Cálculos (con datos de ejemplo)
+
+Valores esperados con datos_ejemplo.xlsx:
+
+  Cuentas: 5 (ACC001 a ACC005)
+  
+  MRR global: $28,000
+    └─ 5000 + 8500 + 3200 + 6800 + 4500
+  
+  ARR global: $336,000
+    └─ 28,000 × 12
+  
+  NRR: ≈ 115%
+    └─ Fórmula: (MRR_Start + Expansion - Contraction - Churned) / MRR_Start
+  
+  Churn Rate: ≈ 5.1%
+    └─ Total clientes perdidos / total inicio
+  
+  NPS: Positivo (más promoters que detractors)
+    └─ NPS response 9-10 son promoters, 0-6 son detractors
+  
+  Adoption Rate: ≈ 74%
+    └─ 550 usuarios activos / 750 licencias totales
+  
+  Revenue at Risk: Dependerá de Health Scores
+    └─ Suma de ARR donde Health Score < 70
+
+Validación de Health Scores por cuenta:
+
+  ACC001 (78%):           🟡 Bueno      ✓ Riesgo Bajo
+  ACC002 (92%):           🟢 Excelente  ✓ Riesgo Bajo
+  ACC003 (45%):           🔴 Crítico    ✓ Riesgo Crítico
+  ACC004 (88%):           🟢 Excelente  ✓ Riesgo Bajo
+  ACC005 (35%):           🔴 Crítico    ✓ Riesgo Crítico
+
+═════════════════════════════════════════════════════════════════════════
+
+🐛 PASO 5: Pruebas de Error
+
+Manejo de errores esperado:
+
+  1️⃣  Cargar archivo incorrecto
+      ├─ Intenta cargar un .txt
+      ├─ ✓ Deberías ver error: "Error al cargar el archivo"
+      └─ ✓ NO debería romper la aplicación
+
+  2️⃣  Cargar Excel sin hojas requeridas
+      ├─ Crea Excel sin hoja "Accounts"
+      ├─ Intenta cargar
+      ├─ ✓ Deberías ver aviso: "No se encontró Accounts"
+      └─ ✓ Aplicación sigue funcionando
+
+  3️⃣  Botón "Limpiar datos"
+      ├─ Carga un Excel
+      ├─ Haz clic "Limpiar datos"
+      ├─ ✓ Datos desaparecen
+      ├─ ✓ Vuelve estado inicial
+      └─ ✓ Puedes cargar otro archivo
+
+═════════════════════════════════════════════════════════════════════════
+
+📱 PASO 6: Responsive Design
+
+Pruebas en diferentes tamaños (usar F12 → Device Mode):
+
+  ☐ Desktop (1920×1080)      - Todo visible, bien espaciado
+  ☐ Laptop (1366×768)        - Todo visible, buena proporción
+  ☐ Tablet (768×1024)        - Grid adaptado, scroll horizontal OK
+  ☐ Mobile (375×667)         - Una columna, swipeable, legible
+
+═════════════════════════════════════════════════════════════════════════
+
+🎉 PASO 7: Verificación Final
+
+Si todo está ✓, entonces:
+
+  ✅ Lógica de cálculos: CORRECTA
+  ✅ Interfaz visual: CORRECTA
+  ✅ Manejo de datos: CORRECTO
+  ✅ Respuesta a errores: ADECUADA
+  ✅ Performance: RÁPIDA
+  ✅ Diseño responsive: FUNCIONA
+  
+  🎉 PROYECTO COMPLETADO Y LISTO PARA USAR
+
+═════════════════════════════════════════════════════════════════════════
+
+❌ RESOLUCIÓN DE PROBLEMAS
+
+Si algo no funciona:
+
+  Problema: Página no carga
+    → Verifica que index.html esté abierto con doble clic
+    → Intenta en navegador diferente
+    → Revisa consola (F12) para ver errores
+
+  Problema: Botón "Cargar Excel" no funciona
+    → Abre consola (F12)
+    → Busca mensajes de error
+    → Intenta con archivo diferente
+
+  Problema: Datos no se cargan
+    → Verifica estructura Excel (hojas y columnas)
+    → Revisa que no haya filas vacías al inicio
+    → Prueba con datos_ejemplo.xlsx
+
+  Problema: Números se ven como 0
+    → Verifica que en Excel los valores sean números (no texto)
+    → Intenta reformatear columnas en Excel
+
+  Problema: Interfaz luce diferente
+    → Limpia caché del navegador (Ctrl+Shift+Del)
+    → Recarga página (Ctrl+F5)
+    → Intenta navegador diferente
+
+═════════════════════════════════════════════════════════════════════════
+
+📞 CONEXIÓN A INTERNET
+
+SheetJS se carga desde CDN (línea en index.html):
+  https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.min.js
+
+Esto requiere conexión a Internet la primera vez.
+Después, se cachea localmente.
+
+✓ Verifica que tu firewall NO bloquee cdnjs.cloudflare.com
+
+═════════════════════════════════════════════════════════════════════════
+
+🎓 NOTAS IMPORTANTES
+
+✓ LaS fechas en Excel usan formato YYYY-MM-DD
+✓ Los números POR FAVOR sin símbolos ($, %)
+✓ Los porcentajes en Excel como número (78.5, no 78.5%)
+✓ Respuestas NPS como número 0-10
+
+═════════════════════════════════════════════════════════════════════════
+
+📊 RESUMEN FINAL
+
+Después de completar este checklist, tu aplicación estará:
+
+  ✅ Funcionando correctamente
+  ✅ Calculando KPIs automáticamente
+  ✅ Mostrando datos en interfaz moderna
+  ✅ Identificando cuentas en riesgo
+  ✅ Lista para análisis real
+
+🚀 ¡PROYECTO LISTO PARA PRODUCCIÓN!
+
+═════════════════════════════════════════════════════════════════════════
+
+Versión 1.0 • Febrero 2026
+Dashboard de Gestión de Cuentas - Validación Completa

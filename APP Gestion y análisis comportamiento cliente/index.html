@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión y Análisis Comportamiento Cliente</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>📊 Dashboard de Gestión de Cuentas</h1>
+                <p>Análisis de KPIs de Comportamiento del Cliente</p>
+            </div>
+            <div class="header-controls">
+                <button class="btn btn-primary" id="uploadBtn" onclick="document.getElementById('fileInput').click()">
+                    📁 Cargar Excel
+                </button>
+                <input type="file" id="fileInput" accept=".xlsx,.xls" style="display: none;">
+                <button id="clearData" class="btn btn-secondary" style="display: none;">Limpiar datos</button>
+            </div>
+        </header>
+
+        <!-- Loading/Message -->
+        <div id="message" class="message" style="display: none;"></div>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- KPI Summary Section -->
+            <section class="kpi-section" id="kpiSection" style="display: none;">
+                <h2 class="section-title">📈 KPIs Globales</h2>
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-label">MRR</div>
+                        <div class="kpi-value" id="mrrValue">$0</div>
+                        <div class="kpi-subtitle">Ingresos Recurrentes Mensuales</div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-label">ARR</div>
+                        <div class="kpi-value" id="arrValue">$0</div>
+                        <div class="kpi-subtitle">Ingresos Recurrentes Anuales</div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-label">NRR</div>
+                        <div class="kpi-value" id="nrrValue">0%</div>
+                        <div class="kpi-subtitle">Tasa de Retención Neta</div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-label">Churn Rate</div>
+                        <div class="kpi-value" id="churnValue">0%</div>
+                        <div class="kpi-subtitle">Tasa de Pérdida de Clientes</div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-label">NPS</div>
+                        <div class="kpi-value" id="npsValue">0</div>
+                        <div class="kpi-subtitle">Net Promoter Score</div>
+                    </div>
+
+                    <div class="kpi-card risky">
+                        <div class="kpi-label">Revenue at Risk</div>
+                        <div class="kpi-value" id="revenueAtRiskValue">$0</div>
+                        <div class="kpi-subtitle">Ingresos en Riesgo</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Risk Levels Summary Section -->
+            <section class="risk-section" id="riskSection" style="display: none;">
+                <h2 class="section-title">⚠️ Análisis de Niveles de Riesgo</h2>
+                <div class="risk-summary-grid">
+                    <div class="risk-summary-card excellent">
+                        <div class="risk-icon">🟢</div>
+                        <div class="risk-count" id="excellentCount">0</div>
+                        <div class="risk-label">Excelente</div>
+                        <div class="risk-range">Health Score: 80-100</div>
+                        <div class="risk-accounts" id="excellentAccounts"></div>
+                    </div>
+                    <div class="risk-summary-card good">
+                        <div class="risk-icon">🟡</div>
+                        <div class="risk-count" id="goodCount">0</div>
+                        <div class="risk-label">Bueno</div>
+                        <div class="risk-range">Health Score: 60-79</div>
+                        <div class="risk-accounts" id="goodAccounts"></div>
+                    </div>
+                    <div class="risk-summary-card at-risk">
+                        <div class="risk-icon">🟠</div>
+                        <div class="risk-count" id="atRiskCount">0</div>
+                        <div class="risk-label">En Riesgo</div>
+                        <div class="risk-range">Health Score: 40-59</div>
+                        <div class="risk-accounts" id="atRiskAccounts"></div>
+                    </div>
+                    <div class="risk-summary-card critical">
+                        <div class="risk-icon">🔴</div>
+                        <div class="risk-count" id="criticalCount">0</div>
+                        <div class="risk-label">Crítico</div>
+                        <div class="risk-range">Health Score: 0-39</div>
+                        <div class="risk-accounts" id="criticalAccounts"></div>
+                    </div>
+                </div>
+                
+                <!-- Revenue at Risk Breakdown -->
+                <div class="revenue-risk-breakdown">
+                    <h3 class="breakdown-title">💰 Desglose de Revenue at Risk</h3>
+                    <div class="risk-bars">
+                        <div class="risk-bar-item">
+                            <div class="risk-bar-label">
+                                <span>🔴 Crítico</span>
+                                <span class="risk-bar-value" id="criticalRevenue">€0</span>
+                            </div>
+                            <div class="risk-bar-container">
+                                <div class="risk-bar risk-bar-critical" id="criticalBar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="risk-bar-item">
+                            <div class="risk-bar-label">
+                                <span>🟠 En Riesgo</span>
+                                <span class="risk-bar-value" id="atRiskRevenue">€0</span>
+                            </div>
+                            <div class="risk-bar-container">
+                                <div class="risk-bar risk-bar-at-risk" id="atRiskBar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="risk-bar-item">
+                            <div class="risk-bar-label">
+                                <span>🟢 Saludable</span>
+                                <span class="risk-bar-value" id="healthyRevenue">€0</span>
+                            </div>
+                            <div class="risk-bar-container">
+                                <div class="risk-bar risk-bar-healthy" id="healthyBar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Historical Trends Section -->
+            <section class="trends-section" id="trendsSection" style="display: none;">
+                <h2 class="section-title">📊 Tendencias Históricas (5 Años)</h2>
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3 class="chart-title">Evolución MRR</h3>
+                        <canvas id="mrrChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3 class="chart-title">Evolución Churn Rate</h3>
+                        <canvas id="churnChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3 class="chart-title">Evolución NPS</h3>
+                        <canvas id="npsChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3 class="chart-title">Evolución NRR</h3>
+                        <canvas id="nrrChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Accounts Table Section -->
+            <section class="accounts-section" id="accountsSection" style="display: none;">
+                <h2 class="section-title">🏢 Análisis de Cuentas</h2>
+                <div class="table-wrapper">
+                    <table class="accounts-table" id="accountsTable">
+                        <thead>
+                            <tr>
+                                <th>Cuenta</th>
+                                <th>Health Score</th>
+                                <th>MRR</th>
+                                <th>Adoption Rate</th>
+                                <th>Renovation Date</th>
+                                <th>Nivel de Riesgo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="accountsTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Empty State -->
+            <div class="empty-state" id="emptyState">
+                <div class="empty-state-icon">📂</div>
+                <h3>Carga tu archivo Excel</h3>
+                <p>Selecciona un archivo Excel con las hojas: Accounts, Period_Data y NPS_Data</p>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Dashboard de Gestión de Cuentas v1.0 • Desarrollado con HTML, CSS y JavaScript puro</p>
+        </footer>
+    </div>
+
+    <!-- External Libraries -->
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    
+    <script>
+        console.log('🚀 Iniciando carga del sistema...');
+        
+        // Sistema robusto de carga de SheetJS con múltiples CDNs
+        (function cargarSheetJS() {
+            const cdns = [
+                'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js',
+                'https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js',
+                'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'
+            ];
+            
+            let intentoActual = 0;
+            
+            function intentarCargar() {
+                if (intentoActual >= cdns.length) {
+                    console.error('❌ No se pudo cargar SheetJS desde ningún CDN');
+                    // Notificar al usuario pero no bloquear la app
+                    window.xlsxLoadError = true;
+                    return;
+                }
+                
+                console.log(`⏳ Intentando cargar SheetJS desde CDN ${intentoActual + 1}/${cdns.length}...`);
+                const script = document.createElement('script');
+                script.src = cdns[intentoActual];
+                
+                script.onload = function() {
+                    console.log('✅ SheetJS cargado correctamente desde CDN ' + (intentoActual + 1));
+                    window.xlsxLoaded = true;
+                };
+                
+                script.onerror = function() {
+                    console.warn(`❌ Falló CDN ${intentoActual + 1}, intentando siguiente...`);
+                    intentoActual++;
+                    intentarCargar();
+                };
+                
+                document.head.appendChild(script);
+            }
+            
+            intentarCargar();
+        })();
+    </script>
+    
+    <!-- Application Script - Cargar inmediatamente -->
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualidad - Dashboard de Cuentas</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="navigation.css">
+    <link rel="stylesheet" href="help-system.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <a href="inicio.html">
+                <span class="sidebar-logo-icon">📊</span>
+                <span class="sidebar-logo-text">CS Analytics</span>
+            </a>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="sidebar-nav-item">
+                <a href="inicio.html" class="sidebar-nav-link" title="Volver al Inicio">
+                    <span class="sidebar-nav-icon">🏠</span>
+                    <span class="sidebar-nav-text">Inicio</span>
+                </a>
+            </div>
+            <div class="sidebar-nav-item">
+                <a href="1_historial.html" class="sidebar-nav-link" title="Historial 10 Años">
+                    <span class="sidebar-nav-icon">📈</span>
+                    <span class="sidebar-nav-text">Historial</span>
+                </a>
+            </div>
+            <div class="sidebar-nav-item">
+                <a href="2_actualidad.html" class="sidebar-nav-link active" title="Actualidad 2026">
+                    <span class="sidebar-nav-icon">⚡</span>
+                    <span class="sidebar-nav-text">Actualidad</span>
+                </a>
+            </div>
+            <div class="sidebar-nav-item">
+                <a href="3_tendencias.html" class="sidebar-nav-link" title="Tendencias 2027">
+                    <span class="sidebar-nav-icon">📉</span>
+                    <span class="sidebar-nav-text">Tendencias</span>
+                </a>
+            </div>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="https://www.linkedin.com/in/tamarasanchezdiaz/" target="_blank" rel="noopener noreferrer" class="sidebar-footer-author">
+                <img src="tamara-profile.jpg" alt="Tamara Sánchez Díaz" class="sidebar-footer-photo">
+                <div class="sidebar-footer-info">
+                    <span class="sidebar-footer-name">Tamara Sánchez Díaz</span>
+                    <span class="sidebar-footer-title">CS Specialist</span>
+                </div>
+            </a>
+            <p class="sidebar-footer-copyright">© 2026</p>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT WRAPPER -->
+    <div class="main-wrapper">
+        <!-- NAVEGACIÓN -->
+    <nav class="nav-container">
+        <div class="nav-header">
+            <div class="nav-brand">
+                <span class="nav-brand-icon">📊</span>
+                Dashboard Customer Success
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="1_historial.html" class="nav-link">
+                        <span class="nav-icon">📈</span>
+                        Historial 10 Años
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="2_actualidad.html" class="nav-link active">
+                        <span class="nav-icon">📍</span>
+                        Actualidad
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="3_tendencias.html" class="nav-link">
+                        <span class="nav-icon">�</span>
+                        Tendencias
+                    </a>
+                </li>
+            </ul>
+            <div class="nav-file-upload">
+                <div class="nav-file-actions">
+                    <label for="excelFile" class="nav-file-label">
+                        <span>📂</span>
+                        <span>Cargar Excel</span>
+                    </label>
+                    <div class="nav-file-info">
+                        <div class="nav-file-info-icon">💡</div>
+                        <div class="nav-file-tooltip">
+                            <h4>📋 Requisitos del Archivo Excel</h4>
+                            <p>El archivo debe contener <strong>3 hojas</strong> con la siguiente estructura:</p>
+                            <ul>
+                                <li><strong>Accounts:</strong> Datos de cuentas (Account_ID, MRR_Current, ARR_Current, Total_Licenses, Active_Users, etc.)</li>
+                                <li><strong>Period_Data:</strong> Datos históricos por período (MRR_Starting, Expansion_Revenue, Contraction_Revenue, Churned_Revenue, etc.)</li>
+                                <li><strong>NPS_Data:</strong> Respuestas NPS (Account_ID, Period, NPS_Response de 0-10)</li>
+                            </ul>
+                            <p style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid #e5e7eb;">
+                                <strong>📊 6 Métricas Clave que Analizaremos:</strong>
+                            </p>
+                            <ul style="font-size: 0.8rem; margin-top: 0.5rem;">
+                                <li>💰 <strong>MRR/ARR:</strong> Ingresos recurrentes</li>
+                                <li>📈 <strong>NRR:</strong> Retención neta de ingresos</li>
+                                <li>🚪 <strong>Churn Rate:</strong> Tasa de abandono</li>
+                                <li>⭐ <strong>NPS:</strong> Satisfacción del cliente</li>
+                                <li>🎯 <strong>Health Score:</strong> Salud de cuentas</li>
+                                <li>🔄 <strong>Renovación:</strong> Tasas de retención</li>
+                            </ul>
+                            <p style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid #e5e7eb;">
+                                💡 <strong>Tip:</strong> Descarga la plantilla de ejemplo con todas las métricas configuradas.
+                            </p>
+                        </div>
+                    </div>
+                    <a href="generar_excel_offline.html" class="nav-download-template" title="Descargar plantilla Excel">
+                        <span>📥</span>
+                        <span>Plantilla</span>
+                    </a>
+                </div>
+                <input type="file" id="excelFile" accept=".xlsx, .xls" class="nav-file-input">
+                <span id="fileName" class="nav-file-name"></span>
+            </div>
+        </div>
+        <div id="message" class="message-banner"></div>
+    </nav>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="container">
+        <header class="header">
+            <h1>📍 Estado Actual (2026)</h1>
+            <p>Snapshot del año en curso y métricas en tiempo real</p>
+        </header>
+
+        <!-- MÉTRICAS PRINCIPALES -->
+        <section class="summary-section">
+            <h2>📊 Métricas Clave del Año</h2>
+            <div class="comparison-grid">
+                <div class="comparison-card">
+                    <div class="comparison-label">MRR</div>
+                    <div class="comparison-description">Monthly Recurring Revenue: Ingresos recurrentes mensuales</div>
+                    <div class="comparison-value" id="mrrValue">$0</div>
+                    <div class="comparison-sublabel" id="mrrChange">
+                        <span class="change-indicator">↑</span>
+                        0% vs año anterior
+                    </div>
+                </div>
+                <div class="comparison-card">
+                    <div class="comparison-label">ARR</div>
+                    <div class="comparison-description">Annual Recurring Revenue: MRR × 12, proyección anual</div>
+                    <div class="comparison-value" id="arrValue">$0</div>
+                    <div class="comparison-sublabel" id="arrChange">
+                        <span class="change-indicator">↑</span>
+                        0% vs año anterior
+                    </div>
+                </div>
+                <div class="comparison-card">
+                    <div class="comparison-label">NRR</div>
+                    <div class="comparison-description">Net Revenue Retention: Retención + crecimiento de clientes existentes</div>
+                    <div class="comparison-value" id="nrrValue">0%</div>
+                    <div class="comparison-sublabel" id="nrrChange">
+                        <span class="change-indicator">↑</span>
+                        0 pts vs año anterior
+                    </div>
+                </div>
+                <div class="comparison-card">
+                    <div class="comparison-label">Churn Rate</div>
+                    <div class="comparison-description">% de clientes perdidos. <5% excelente, >15% crítico</div>
+                    <div class="comparison-value" id="churnValue">0%</div>
+                    <div class="comparison-sublabel" id="churnChange">
+                        <span class="change-indicator">↓</span>
+                        0% vs año anterior
+                    </div>
+                </div>
+                <div class="comparison-card">
+                    <div class="comparison-label">NPS</div>
+                    <div class="comparison-description">Net Promoter Score: Lealtad del cliente. >50 excelente, <0 crítico</div>
+                    <div class="comparison-value" id="npsValue">0</div>
+                    <div class="comparison-sublabel" id="npsChange">
+                        <span class="change-indicator">↑</span>
+                        0 pts vs año anterior
+                    </div>
+                </div>
+                <div class="comparison-card highlight risk-card-wide">
+                    <div class="risk-card-left">
+                        <div class="comparison-label">Revenue at Risk</div>
+                        <div class="comparison-description">MRR de cuentas con Health Score < 50. Dinero en riesgo de pérdida</div>
+                        <div class="comparison-value" id="riskValue">$0</div>
+                        <div class="comparison-sublabel">Cuentas en riesgo</div>
+                    </div>
+                    <div class="risk-card-right">
+                        <div class="risk-accounts-summary" id="riskAccountsSummary">
+                            <!-- Aquí se insertarán las cuentas en riesgo -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ANÁLISIS GLOBAL -->
+        <section class="summary-section">
+            <h2>💡 Análisis Global del Estado Actual</h2>
+            <div class="global-analysis-container">
+                <div class="analysis-card">
+                    <h3>💡 Resumen Ejecutivo</h3>
+                    <div class="analysis-content" id="executiveSummary">
+                        <p>Cargando análisis...</p>
+                    </div>
+                </div>
+                <div class="analysis-card">
+                    <h3>🎯 Métricas Clave</h3>
+                    <div class="analysis-content" id="keyMetricsAnalysis">
+                        <p>Cargando métricas...</p>
+                    </div>
+                </div>
+                <div class="analysis-card">
+                    <h3>⚠️ Alertas y Recomendaciones</h3>
+                    <div class="analysis-content" id="alertsRecommendations">
+                        <p>Cargando alertas...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ANÁLISIS DE RIESGO -->
+        <section class="risk-section">
+            <h2>
+                ⚠️ Análisis de Riesgo por Cuenta
+                <span class="info-icon" data-tooltip="Health Score combina: Uso del producto (30%), NPS (20%), Tickets soporte (20%), Engagement (15%), Renovación (15%)">?</span>
+            </h2>
+            <div class="risk-summary-grid">
+                <div class="risk-summary-card excellent">
+                    <div class="risk-icon">🟢</div>
+                    <div class="risk-count" id="excellentCount">0</div>
+                    <div class="risk-label">Excelente</div>
+                    <div class="risk-accounts" id="excellentAccounts">-</div>
+                </div>
+                <div class="risk-summary-card good">
+                    <div class="risk-icon">🟡</div>
+                    <div class="risk-count" id="goodCount">0</div>
+                    <div class="risk-label">Bueno</div>
+                    <div class="risk-accounts" id="goodAccounts">-</div>
+                </div>
+                <div class="risk-summary-card at-risk">
+                    <div class="risk-icon">🟠</div>
+                    <div class="risk-count" id="atRiskCount">0</div>
+                    <div class="risk-label">En Riesgo</div>
+                    <div class="risk-accounts" id="atRiskAccounts">-</div>
+                </div>
+                <div class="risk-summary-card critical">
+                    <div class="risk-icon">🔴</div>
+                    <div class="risk-count" id="criticalCount">0</div>
+                    <div class="risk-label">Crítico</div>
+                    <div class="risk-accounts" id="criticalAccounts">-</div>
+                </div>
+            </div>
+
+            <div class="revenue-risk-breakdown">
+                <h3>
+                    💰 Distribución de Revenue por Nivel de Riesgo
+                    <span class="info-icon" data-tooltip="Muestra qué porcentaje de tus ingresos está en cada nivel de riesgo. Prioriza atención donde hay mayor MRR en riesgo">?</span>
+                </h3>
+                <div class="risk-bar-container">
+                    <div class="risk-bar-item">
+                        <span class="risk-bar-label">🔴 Crítico</span>
+                        <div class="risk-bar-track">
+                            <div class="risk-bar critical" id="criticalBar"></div>
+                        </div>
+                        <span class="risk-bar-value" id="criticalRevenue">$0</span>
+                    </div>
+                    <div class="risk-bar-accounts-inline" id="criticalAccountsList"></div>
+                    
+                    <div class="risk-bar-item">
+                        <span class="risk-bar-label">🟠 En Riesgo</span>
+                        <div class="risk-bar-track">
+                            <div class="risk-bar at-risk" id="atRiskBar"></div>
+                        </div>
+                        <span class="risk-bar-value" id="atRiskRevenue">$0</span>
+                    </div>
+                    <div class="risk-bar-accounts-inline" id="atRiskAccountsList"></div>
+                    
+                    <div class="risk-bar-item">
+                        <span class="risk-bar-label">🟢 Saludable</span>
+                        <div class="risk-bar-track">
+                            <div class="risk-bar healthy" id="healthyBar"></div>
+                        </div>
+                        <span class="risk-bar-value" id="healthyRevenue">$0</span>
+                    </div>
+                    <div class="risk-bar-accounts-inline" id="healthyAccountsList"></div>
+                </div>
+            </div>
+
+            <!-- DETALLE DE CUENTAS EN RIESGO -->
+            <div class="accounts-at-risk-detail" id="accountsAtRiskDetail" style="margin-top: 2rem;">
+                <!-- Se llenará dinámicamente con JavaScript -->
+            </div>
+        </section>
+
+        <!-- EVOLUCIÓN TRIMESTRAL 2026 -->
+        <section class="quarterly-section">
+            <h2>
+                📊 Evolución Trimestral 2026
+                <span class="info-icon" data-tooltip="Tendencia de MRR y NRR durante el año actual. Identifica estacionalidad y patrones de crecimiento">?</span>
+            </h2>
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3>
+                        💰 MRR por Trimestre
+                        <span class="info-icon" data-tooltip="Ingresos recurrentes mensuales en cada trimestre de 2026">?</span>
+                    </h3>
+                    <div class="chart-container">
+                        <canvas id="mrrQuarterlyChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h3>
+                        📈 NRR por Trimestre
+                        <span class="info-icon" data-tooltip="Retención neta de ingresos por trimestre. >100% indica crecimiento orgánico">?</span>
+                    </h3>
+                    <div class="chart-container">
+                        <canvas id="nrrQuarterlyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TABLA DE CUENTAS -->
+        <section class="table-section">
+            <h2>
+                📋 Detalle de Cuentas Activas
+                <span class="info-icon" data-tooltip="Vista detallada de todas las cuentas con sus métricas de salud y asignación de CSM">?</span>
+            </h2>
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Cuenta <span class="info-icon" data-tooltip="Nombre del cliente">?</span></th>
+                            <th>MRR <span class="info-icon" data-tooltip="Ingresos mensuales recurrentes">?</span></th>
+                            <th>ARR <span class="info-icon" data-tooltip="Proyección anual (MRR×12)">?</span></th>
+                            <th>Health Score <span class="info-icon" data-tooltip="Puntuación de salud 0-100">?</span></th>
+                            <th>Adopción <span class="info-icon" data-tooltip="% de usuarios activos vs licencias">?</span></th>
+                            <th>NPS <span class="info-icon" data-tooltip="Puntuación de lealtad -100 a +100">?</span></th>
+                            <th>Riesgo <span class="info-icon" data-tooltip="Nivel de riesgo basado en Health Score">?</span></th>
+                            <th>CSM <span class="info-icon" data-tooltip="Customer Success Manager asignado">?</span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="accountsTableBody">
+                        <tr>
+                            <td colspan="8" class="empty-state">
+                                📂 Carga un archivo Excel para ver las cuentas activas
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>Customer Success Analytics Platform © 2026</p>
+        <p style="margin-top: 0.3rem; font-size: 0.85em; opacity: 0.8;">
+            Developed by: <a href="https://www.linkedin.com/in/tamarasanchezdiaz/" target="_blank" rel="noopener noreferrer" style="color: inherit; font-weight: bold; text-decoration: none; border-bottom: 1px solid rgba(100, 116, 139, 0.3); transition: all 0.3s ease;">Tamara Sánchez</a>, Customer Success Specialist
+        </p>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="help-system.js"></script>
+    <script src="script_actualidad.js"></script>
+    </div>
+</body>
+</html>

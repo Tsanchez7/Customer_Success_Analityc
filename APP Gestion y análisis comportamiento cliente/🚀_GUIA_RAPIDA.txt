@@ -1,0 +1,187 @@
+🚀 GUÍA RÁPIDA: PONER EN MARCHA LA APLICACIÓN
+═════════════════════════════════════════════════════════════════════════════
+
+✅ PASO 1: DESCARGAR EXCEL CON DATOS
+───────────────────────────────────────
+
+Archivo abierto en tu navegador: descargar_excel.html
+
+Haz clic en: "📥 Descargar Excel (datos_gestion_clientes.xlsx)"
+
+¿Qué obtienes?
+  └─ Archivo Excel XLSX con 3 hojas listas para usar:
+     • Accounts (5 cuentas ficticias)
+     • Period_Data (10 registros de períodos)
+     • NPS_Data (13 respuestas de satisfacción)
+
+═════════════════════════════════════════════════════════════════════════════
+
+✅ PASO 2: ABRIR EL DASHBOARD
+───────────────────────────────────────
+
+Abre en tu navegador (o haz doble clic): index.html
+
+¿Qué ves?
+  ├─ Header con título "Dashboard de Gestión de Cuentas"
+  ├─ Botón "📁 Cargar Excel"
+  ├─ Botón "Limpiar datos"
+  └─ Mensaje: "Carga un archivo Excel para comenzar"
+
+═════════════════════════════════════════════════════════════════════════════
+
+✅ PASO 3: CARGAR EL EXCEL EN EL DASHBOARD
+────────────────────────────────────────────
+
+1. Haz clic en el botón: "📁 Cargar Excel"
+2. Selecciona el archivo: "datos_gestion_clientes.xlsx"
+3. Espera a que se procese (muy rápido, < 1 segundo)
+
+¿Qué pasa?
+  ├─ Mensaje verde: "✓ Archivo cargado correctamente"
+  ├─ Aparecerá panel de 6 KPIs globales
+  ├─ Aparecerá tabla con 5 cuentas
+  └─ Todos los cálculos se hacen automáticamente
+
+═════════════════════════════════════════════════════════════════════════════
+
+✅ PASO 4: EXPLORA LOS RESULTADOS
+──────────────────────────────────
+
+Panel Superior - 6 Tarjetas de KPIs:
+  📈 MRR:             $28,000 (ingresos mensuales)
+  📈 ARR:             $336,000 (ingresos anuales)
+  📊 NRR:             ~115% (retención neta)
+  📉 Churn Rate:      ~5% (pérdida de clientes)
+  ⭐ NPS:             Positivo (satisfacción)
+  🔴 Revenue at Risk: $38,400 (cuentas en riesgo)
+
+Tabla Inferior - Análisis por Cuenta:
+  ├─ Empresa Tech SA           Health: 78%  🟡 Riesgo Bajo
+  ├─ Digital Solutions Inc     Health: 92%  🟢 Riesgo Bajo
+  ├─ Cloud Services Ltd        Health: 45%  🔴 Riesgo Crítico
+  ├─ Innovation Labs           Health: 88%  🟢 Riesgo Bajo
+  └─ Global Ventures           Health: 35%  🔴 Riesgo Crítico
+
+═════════════════════════════════════════════════════════════════════════════
+
+📊 DATOS INCLUIDOS EN EL EXCEL
+
+5 CUENTAS FICTICIAS:
+  ACC001: Empresa Tech SA           MRR: $5,000   (Buena)
+  ACC002: Digital Solutions Inc     MRR: $8,500   (Excelente)
+  ACC003: Cloud Services Ltd        MRR: $3,200   (En riesgo)
+  ACC004: Innovation Labs           MRR: $6,800   (Excelente)
+  ACC005: Global Ventures           MRR: $4,500   (Crítica)
+
+2 PERÍODOS POR CUENTA:
+  Q4 2025 → Q1 2026
+  (Datos de ingresos, expansión, pérdida, renovaciones)
+
+13 RESPUESTAS NPS:
+  Distribuidas entre todas las cuentas
+  (Para calcular satisfacción automáticamente)
+
+═════════════════════════════════════════════════════════════════════════════
+
+✨ CARACTERÍSTICAS QUE VERÁS EN ACCIÓN
+
+✓ Cálculo automático de MRR, ARR, NRR
+✓ Health Score dinámico (basado en 5 factores)
+✓ Identificación de cuentas en riesgo
+✓ Net Promoter Score (NPS) automático
+✓ Tasa de adopción por cuenta
+✓ Colores según nivel de riesgo (verde/naranja/rojo)
+✓ Interfaz responsive y moderna
+
+═════════════════════════════════════════════════════════════════════════════
+
+🎨 INTERPRETAR LOS COLORES
+
+Health Score (Tarjetas de cuentas):
+  🟢 Verde (≥85%)        → Excelente
+  🟡 Verde claro (70%)   → Bueno
+  🟠 Naranja (50%)       → Advertencia
+  🔴 Rojo (<50%)         → Crítico
+
+Nivel de Riesgo (Tabla):
+  ✓ Bajo               → Verdes (sin problemas)
+  ⚠ Medio              → Naranjas (monitorear)
+  ⚠ Alto               → Naranja oscuro (atender)
+  🔴 Crítico           → Rojo (urgente)
+
+═════════════════════════════════════════════════════════════════════════════
+
+🔧 ARCHIVOS DISPONIBLES
+
+PRINCIPALES:
+  📄 index.html               ← Dashboard (abre esto)
+  🎨 style.css                ← Estilos
+  ⚙️ script.js                ← Lógica
+
+DESCARGAS:
+  📥 descargar_excel.html     ← Descarga datos
+  📥 generar_datos.html       ← Alternativa para descargar
+
+DOCUMENTACIÓN:
+  📖 readme.md
+  📖 README_GUIA.md
+  📖 INSTRUCCIONES.txt
+  📖 ESTRUCTURA.txt
+  📖 VALIDACION.txt
+
+═════════════════════════════════════════════════════════════════════════════
+
+⚡ RESUMEN EN 3 CLICKS
+
+1. Click en descargar_excel.html  → Descarga Excel
+2. Click en index.html             → Abre Dashboard
+3. Click en "Cargar Excel"         → Carga datos
+
+¡LISTO! La app está funcionando con todos los KPIs calculados automáticamente.
+
+═════════════════════════════════════════════════════════════════════════════
+
+❓ PREGUNTAS FRECUENTES
+
+¿Se descargó algo en mi PC?
+  → SÍ, tendrás: datos_gestion_clientes.xlsx
+
+¿Puedo usar mis propios datos?
+  → SÍ, carga cualquier Excel con la misma estructura
+
+¿Se envía información a internet?
+  → NO, todo procesa en tu máquina (100% seguro)
+
+¿Qué navegador usar?
+  → Cualquiera: Chrome, Firefox, Safari, Edge
+
+¿Puedo cambiar los cálculos?
+  → SÍ, editando script.js
+
+═════════════════════════════════════════════════════════════════════════════
+
+✅ VERIFICACIÓN FINAL
+
+Después de cargar el Excel deberías ver:
+
+  ☐ 6 tarjetas KPI con valores numéricos
+  ☐ Tabla con 5 filas de cuentas
+  ☐ Health scores con colores (verde/naranja/rojo)
+  ☐ Datos coinciden con el Excel cargado
+  ☐ Sin errores en navegador (F12 → Console)
+
+═════════════════════════════════════════════════════════════════════════════
+
+🚀 ¡LA APLICACIÓN ESTÁ LISTA!
+
+Ahora tienes:
+  ✓ Dashboard profesional
+  ✓ Datos ficticios para pruebas
+  ✓ KPIs calculados automáticamente
+  ✓ Análisis de riesgos por cuenta
+  ✓ Interfaz moderna y responsive
+
+═════════════════════════════════════════════════════════════════════════════
+
+Versión 1.0 • Febrero 2026
+SIN BACKEND • SIN FRAMEWORKS • TODO LOCAL

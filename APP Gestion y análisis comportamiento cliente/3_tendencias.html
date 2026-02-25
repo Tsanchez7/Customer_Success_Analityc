@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tendencias y Previsión - Dashboard de Cuentas</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="navigation.css">
+    <link rel="stylesheet" href="help-system.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <a href="inicio.html">
+                <span class="sidebar-logo-icon">📊</span>
+                <span class="sidebar-logo-text">CS Analytics</span>
+            </a>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="sidebar-nav-item">
+                <a href="inicio.html" class="sidebar-nav-link" title="Volver al Inicio">
+                    <span class="sidebar-nav-icon">🏠</span>
+                    <span class="sidebar-nav-text">Inicio</span>
+                </a>
+            </div>
+            <div class="sidebar-nav-item">
+                <a href="1_historial.html" class="sidebar-nav-link" title="Historial 10 Años">
+                    <span class="sidebar-nav-icon">📈</span>
+                    <span class="sidebar-nav-text">Historial</span>
+                </a>
+            </div>
+            <div class="sidebar-nav-item">
+                <a href="2_actualidad.html" class="sidebar-nav-link" title="Actualidad 2026">
+                    <span class="sidebar-nav-icon">⚡</span>
+                    <span class="sidebar-nav-text">Actualidad</span>
+                </a>
+            </div>
+            <div class="sidebar-nav-item">
+                <a href="3_tendencias.html" class="sidebar-nav-link active" title="Tendencias 2027">
+                    <span class="sidebar-nav-icon">📉</span>
+                    <span class="sidebar-nav-text">Tendencias</span>
+                </a>
+            </div>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="https://www.linkedin.com/in/tamarasanchezdiaz/" target="_blank" rel="noopener noreferrer" class="sidebar-footer-author">
+                <img src="tamara-profile.jpg" alt="Tamara Sánchez Díaz" class="sidebar-footer-photo">
+                <div class="sidebar-footer-info">
+                    <span class="sidebar-footer-name">Tamara Sánchez Díaz</span>
+                    <span class="sidebar-footer-title">CS Specialist</span>
+                </div>
+            </a>
+            <p class="sidebar-footer-copyright">© 2026</p>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT WRAPPER -->
+    <div class="main-wrapper">
+        <!-- NAVEGACIÓN -->
+    <nav class="nav-container">
+        <div class="nav-header">
+            <div class="nav-brand">
+                <span class="nav-brand-icon">📊</span>
+                Dashboard Customer Success
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="1_historial.html" class="nav-link">
+                        <span class="nav-icon">📈</span>
+                        Historial 10 Años
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="2_actualidad.html" class="nav-link">
+                        <span class="nav-icon">📍</span>
+                        Actualidad
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="3_tendencias.html" class="nav-link active">
+                        <span class="nav-icon">�</span>
+                        Tendencias
+                    </a>
+                </li>
+            </ul>
+            <div class="nav-file-upload">
+                <div class="nav-file-actions">
+                    <label for="excelFile" class="nav-file-label">
+                        <span>📂</span>
+                        <span>Cargar Excel</span>
+                    </label>
+                    <div class="nav-file-info">
+                        <div class="nav-file-info-icon">💡</div>
+                        <div class="nav-file-tooltip">
+                            <h4>📋 Requisitos del Archivo Excel</h4>
+                            <p>El archivo debe contener <strong>3 hojas</strong> con la siguiente estructura:</p>
+                            <ul>
+                                <li><strong>Accounts:</strong> Datos de cuentas (Account_ID, MRR_Current, ARR_Current, Total_Licenses, Active_Users, etc.)</li>
+                                <li><strong>Period_Data:</strong> Datos históricos por período (MRR_Starting, Expansion_Revenue, Contraction_Revenue, Churned_Revenue, etc.)</li>
+                                <li><strong>NPS_Data:</strong> Respuestas NPS (Account_ID, Period, NPS_Response de 0-10)</li>
+                            </ul>
+                            <p style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid #e5e7eb;">
+                                <strong>📊 6 Métricas Clave que Analizaremos:</strong>
+                            </p>
+                            <ul style="font-size: 0.8rem; margin-top: 0.5rem;">
+                                <li>💰 <strong>MRR/ARR:</strong> Ingresos recurrentes</li>
+                                <li>📈 <strong>NRR:</strong> Retención neta de ingresos</li>
+                                <li>🚪 <strong>Churn Rate:</strong> Tasa de abandono</li>
+                                <li>⭐ <strong>NPS:</strong> Satisfacción del cliente</li>
+                                <li>🎯 <strong>Health Score:</strong> Salud de cuentas</li>
+                                <li>🔄 <strong>Renovación:</strong> Tasas de retención</li>
+                            </ul>
+                            <p style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid #e5e7eb;">
+                                💡 <strong>Tip:</strong> Descarga la plantilla de ejemplo con todas las métricas configuradas.
+                            </p>
+                        </div>
+                    </div>
+                    <a href="generar_excel_offline.html" class="nav-download-template" title="Descargar plantilla Excel">
+                        <span>📥</span>
+                        <span>Plantilla</span>
+                    </a>
+                </div>
+                <input type="file" id="excelFile" accept=".xlsx, .xls" class="nav-file-input">
+                <span id="fileName" class="nav-file-name"></span>
+            </div>
+        </div>
+        <div id="message" class="message-banner"></div>
+    </nav>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="container">
+        <header class="header">
+            <h1>� Tendencias y Previsión 2027</h1>
+            <p>Análisis predictivo basado en datos históricos</p>
+        </header>
+
+        <!-- PREVISIONES CLAVE -->
+        <section class="forecast-section">
+            <h2>📊 Previsiones 2027</h2>
+            <div class="forecast-grid">
+                <div class="forecast-card">
+                    <div class="forecast-label">MRR Proyectado (2027)</div>
+                    <div class="forecast-value" id="forecastMrr">$0</div>
+                    <div class="forecast-confidence">
+                        <span class="confidence-label">Confianza:</span>
+                        <span class="confidence-value" id="forecastMrrConfidence">0%</span>
+                    </div>
+                    <div class="forecast-range">
+                        <span>Rango: </span>
+                        <span id="forecastMrrRange">$0 - $0</span>
+                    </div>
+                </div>
+
+                <div class="forecast-card">
+                    <div class="forecast-label">ARR Proyectado (2027)</div>
+                    <div class="forecast-value" id="forecastArr">$0</div>
+                    <div class="forecast-confidence">
+                        <span class="confidence-label">Confianza:</span>
+                        <span class="confidence-value" id="forecastArrConfidence">0%</span>
+                    </div>
+                    <div class="forecast-range">
+                        <span>Rango: </span>
+                        <span id="forecastArrRange">$0 - $0</span>
+                    </div>
+                </div>
+
+                <div class="forecast-card">
+                    <div class="forecast-label">Churn Esperado (2027)</div>
+                    <div class="forecast-value" id="forecastChurn">0%</div>
+                    <div class="forecast-confidence">
+                        <span class="confidence-label">Tendencia:</span>
+                        <span class="confidence-value" id="forecastChurnTrend">↔</span>
+                    </div>
+                    <div class="forecast-range">
+                        <span>Impacto: </span>
+                        <span id="forecastChurnImpact">-</span>
+                    </div>
+                </div>
+
+                <div class="forecast-card">
+                    <div class="forecast-label">NPS Proyectado (2027)</div>
+                    <div class="forecast-value" id="forecastNps">0</div>
+                    <div class="forecast-confidence">
+                        <span class="confidence-label">Tendencia:</span>
+                        <span class="confidence-value" id="forecastNpsTrend">↔</span>
+                    </div>
+                    <div class="forecast-range">
+                        <span>Clasificación: </span>
+                        <span id="forecastNpsClass">-</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- GRÁFICOS PREDICTIVOS -->
+        <section class="charts-section">
+            <h2>📈 Proyecciones con Tendencia</h2>
+            
+            <div class="chart-card large">
+                <h3>💰 MRR: Histórico + Proyección 2027</h3>
+                <div class="chart-container">
+                    <canvas id="mrrForecastChart"></canvas>
+                </div>
+                <div class="chart-legend">
+                    <span class="legend-item"><span class="legend-color historical"></span> Datos Históricos</span>
+                    <span class="legend-item"><span class="legend-color forecast"></span> Proyección 2027</span>
+                    <span class="legend-item"><span class="legend-color range"></span> Rango de Confianza</span>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3>📊 NRR: Proyección</h3>
+                    <div class="chart-container">
+                        <canvas id="nrrForecastChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h3>🔄 Churn: Proyección</h3>
+                    <div class="chart-container">
+                        <canvas id="churnForecastChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ANÁLISIS DE TENDENCIAS -->
+        <section class="trends-analysis">
+            <h2>🎯 Análisis de Tendencias</h2>
+            <div class="trends-grid">
+                <div class="trend-card positive">
+                    <div class="trend-header">
+                        <span class="trend-icon">📈</span>
+                        <h3>Tendencias Positivas</h3>
+                    </div>
+                    <ul class="trend-list" id="positiveTrends">
+                        <li>Esperando análisis...</li>
+                    </ul>
+                </div>
+
+                <div class="trend-card negative">
+                    <div class="trend-header">
+                        <span class="trend-icon">📉</span>
+                        <h3>Áreas de Preocupación</h3>
+                    </div>
+                    <ul class="trend-list" id="negativeTrends">
+                        <li>Esperando análisis...</li>
+                    </ul>
+                </div>
+
+                <div class="trend-card neutral">
+                    <div class="trend-header">
+                        <span class="trend-icon">➡️</span>
+                        <h3>Métricas Estables</h3>
+                    </div>
+                    <ul class="trend-list" id="stableTrends">
+                        <li>Esperando análisis...</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- RECOMENDACIONES -->
+        <section class="recommendations-section">
+            <h2>💡 Recomendaciones Estratégicas</h2>
+            <div class="recommendations-grid" id="recommendationsContainer">
+                <div class="recommendation-card">
+                    <div class="recommendation-priority high">Alta Prioridad</div>
+                    <div class="recommendation-title">Esperando datos...</div>
+                    <div class="recommendation-description">Carga un archivo Excel para generar recomendaciones personalizadas</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ESCENARIOS -->
+        <section class="scenarios-section">
+            <h2>🎲 Escenarios de Proyección</h2>
+            <div class="scenarios-grid">
+                <div class="scenario-card optimistic">
+                    <div class="scenario-header">
+                        <span class="scenario-icon">🚀</span>
+                        <h3>Escenario Optimista</h3>
+                    </div>
+                    <div class="scenario-metrics">
+                        <div class="scenario-metric">
+                            <span class="metric-label">MRR 2027:</span>
+                            <span class="metric-value" id="optimisticMrr">$0</span>
+                        </div>
+                        <div class="scenario-metric">
+                            <span class="metric-label">Crecimiento:</span>
+                            <span class="metric-value" id="optimisticGrowth">0%</span>
+                        </div>
+                        <div class="scenario-metric">
+                            <span class="metric-label">Churn:</span>
+                            <span class="metric-value" id="optimisticChurn">0%</span>
+                        </div>
+                    </div>
+                    <div class="scenario-assumptions">
+                        <strong>Asunciones:</strong>
+                        <ul id="optimisticAssumptions">
+                            <li>Churn reducido en 30%</li>
+                            <li>NRR > 110%</li>
+                            <li>3 nuevas cuentas enterprise</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="scenario-card realistic">
+                    <div class="scenario-header">
+                        <span class="scenario-icon">🎯</span>
+                        <h3>Escenario Realista</h3>
+                    </div>
+                    <div class="scenario-metrics">
+                        <div class="scenario-metric">
+                            <span class="metric-label">MRR 2027:</span>
+                            <span class="metric-value" id="realisticMrr">$0</span>
+                        </div>
+                        <div class="scenario-metric">
+                            <span class="metric-label">Crecimiento:</span>
+                            <span class="metric-value" id="realisticGrowth">0%</span>
+                        </div>
+                        <div class="scenario-metric">
+                            <span class="metric-label">Churn:</span>
+                            <span class="metric-value" id="realisticChurn">0%</span>
+                        </div>
+                    </div>
+                    <div class="scenario-assumptions">
+                        <strong>Asunciones:</strong>
+                        <ul id="realisticAssumptions">
+                            <li>Mantener tendencia actual</li>
+                            <li>NRR estable ~105%</li>
+                            <li>Crecimiento orgánico</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="scenario-card pessimistic">
+                    <div class="scenario-header">
+                        <span class="scenario-icon">⚠️</span>
+                        <h3>Escenario Pesimista</h3>
+                    </div>
+                    <div class="scenario-metrics">
+                        <div class="scenario-metric">
+                            <span class="metric-label">MRR 2027:</span>
+                            <span class="metric-value" id="pessimisticMrr">$0</span>
+                        </div>
+                        <div class="scenario-metric">
+                            <span class="metric-label">Crecimiento:</span>
+                            <span class="metric-value" id="pessimisticGrowth">0%</span>
+                        </div>
+                        <div class="scenario-metric">
+                            <span class="metric-label">Churn:</span>
+                            <span class="metric-value" id="pessimisticChurn">0%</span>
+                        </div>
+                    </div>
+                    <div class="scenario-assumptions">
+                        <strong>Asunciones:</strong>
+                        <ul id="pessimisticAssumptions">
+                            <li>Aumento de churn 50%</li>
+                            <li>NRR < 100%</li>
+                            <li>Pérdida de 2 cuentas clave</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>Customer Success Analytics Platform © 2026</p>
+        <p style="margin-top: 0.3rem; font-size: 0.85em; opacity: 0.8;">
+            Developed by: <a href="https://www.linkedin.com/in/tamarasanchezdiaz/" target="_blank" rel="noopener noreferrer" style="color: inherit; font-weight: bold; text-decoration: none; border-bottom: 1px solid rgba(100, 116, 139, 0.3); transition: all 0.3s ease;">Tamara Sánchez</a>, Customer Success Specialist
+        </p>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="help-system.js"></script>
+    <script src="script_tendencias.js"></script>
+    </div>
+</body>
+</html>
