@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/APP Gestion y análisis comportamiento cliente/inicio.html" },
+    { "source": "/(.*)", "destination": "/APP Gestion y análisis comportamiento cliente/$1" }
+  ]
+}
