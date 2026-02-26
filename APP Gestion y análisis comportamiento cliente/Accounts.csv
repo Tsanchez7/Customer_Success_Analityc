@@ -1,8 +1,0 @@
-Account_ID,Account_Name,MRR_Current,ARR_Current,Renewal_Date,Total_Licenses,Active_Users,Product_Usage_Percentage,Open_Tickets,Avg_Resolution_Time,Last_Contact_Date
-ACC001,Empresa Tech SA,5000,60000,2026-04-20,100,85,78.5,2,2.5,2026-02-15
-ACC002,Digital Solutions Inc,8500,102000,2026-06-20,200,140,92.0,1,1.8,2026-02-18
-ACC003,Cloud Services Ltd,3200,38400,2026-03-10,75,42,52.5,6,4.8,2025-12-20
-ACC004,Innovation Labs,6800,81600,2026-05-20,150,120,88.7,3,3.1,2026-02-12
-ACC005,Global Ventures,4500,54000,2026-07-20,120,35,28.5,12,8.2,2025-08-10
-ACC006,Startup Innovate,2800,33600,2026-02-28,60,25,38.0,9,7.2,2025-11-05
-ACC007,Enterprise Plus,3800,45600,2026-04-15,100,70,68.5,4,3.8,2026-02-10
