@@ -29,21 +29,19 @@ function handleFileUpload(event) {
     const file = event.target.files[0];
     if (!file) return;
     
-    // Si ya hay datos cargados, pedir confirmación
+    // Si ya hay datos cargados, pedir confirmación (saltamos si es modo demo)
     if (excelData.accounts.length > 0) {
-        const confirmed = confirm(
-            '⚠️ Ya hay un archivo cargado.\n\n' +
-            '¿Desea cargar un nuevo archivo?\n' +
-            'Los datos actuales se reemplazarán completamente.'
-        );
-        
-        if (!confirmed) {
-            // Limpiar el input de archivo
-            event.target.value = '';
-            return;
+        if (!window.isDemoData) {
+            const confirmed = confirm(
+                '⚠️ Ya hay un archivo cargado.\n\n' +
+                '¿Desea cargar un nuevo archivo?\n' +
+                'Los datos actuales se reemplazarán completamente.'
+            );
+            if (!confirmed) {
+                event.target.value = '';
+                return;
+            }
         }
-        
-        // Limpiar todos los datos existentes
         clearAllData();
     }
 
@@ -70,6 +68,7 @@ function handleFileUpload(event) {
 
             // Guardar en localStorage para compartir entre páginas
             saveToLocalStorage();
+            window.isDemoData = false;
 
             // Renderizar dashboards
             renderHistoricalDashboard();
@@ -601,12 +600,21 @@ function loadFromLocalStorage() {
             excelData.accounts = parsed.accounts;
             excelData.periodData = parsed.periodData;
             excelData.npsData = parsed.npsData;
+            window.isDemoData = false;
             
             console.log('📂 Datos cargados desde localStorage');
             renderHistoricalDashboard();
             
             const timestamp = new Date(parsed.timestamp);
             showMessage(`✅ Datos cargados automáticamente (${timestamp.toLocaleString()})`, 'success');
+        } else if (typeof DEMO_DATA !== 'undefined') {
+            excelData.accounts = DEMO_DATA.accounts;
+            excelData.periodData = DEMO_DATA.periodData;
+            excelData.npsData = DEMO_DATA.npsData;
+            window.isDemoData = true;
+            console.log('📊 Modo demostración activado');
+            renderHistoricalDashboard();
+            showMessage('📊 Modo DEMO — Carga tu Excel para ver tus datos reales', 'info');
         }
     } catch (error) {
         console.error('Error al cargar desde localStorage:', error);
