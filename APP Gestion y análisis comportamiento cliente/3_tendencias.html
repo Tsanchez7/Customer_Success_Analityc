@@ -55,6 +55,15 @@
                 </a>
             </div>
         </nav>
+        <div class="sidebar-pdf-wrapper">
+            <button class="sidebar-pdf-btn" onclick="generatePDFReport()" title="Descargar informe PDF con análisis completo">
+                <span class="sidebar-pdf-btn-icon">📄</span>
+                <span class="sidebar-pdf-btn-text">
+                    <span>Descarga tu análisis</span>
+                    <span>Informe PDF completo</span>
+                </span>
+            </button>
+        </div>
         <div class="sidebar-footer">
             <a href="https://www.linkedin.com/in/tamarasanchezdiaz/" target="_blank" rel="noopener noreferrer" class="sidebar-footer-author">
                 <img src="tamara-profile.jpg" alt="Tamara Sánchez Díaz" class="sidebar-footer-photo">
@@ -394,6 +403,9 @@
     <script src="help-system.js"></script>
     <script src="demo-data.js"></script>
     <script src="script_tendencias.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="pdf-export.js"></script>
     </div>
 </body>
 </html>
