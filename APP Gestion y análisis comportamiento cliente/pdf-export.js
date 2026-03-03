@@ -166,7 +166,47 @@
     }
 
     /* ── FUNCIÓN PRINCIPAL ───────────────────────────────────────────────────── */
-    window.generatePDFReport = function () {
+    function loadImageAsDataURL(src, circleSize) {
+        const drawCircle = (img) => {
+            const size = circleSize || 200;
+            const c = document.createElement('canvas');
+            c.width = size; c.height = size;
+            const ctx = c.getContext('2d');
+            ctx.beginPath();
+            ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.clip();
+            const scale = Math.max(size / img.naturalWidth, size / img.naturalHeight);
+            const sw = img.naturalWidth * scale;
+            const sh = img.naturalHeight * scale;
+            ctx.drawImage(img, (size - sw) / 2, (size - sh) / 2, sw, sh);
+            return c.toDataURL('image/png');
+        };
+        return new Promise(resolve => {
+            // Intento 1: fetch (funciona en HTTP/HTTPS, evita canvas tainted)
+            fetch(src)
+                .then(r => r.blob())
+                .then(blob => {
+                    const blobURL = URL.createObjectURL(blob);
+                    const img = new Image();
+                    img.onload = () => {
+                        try { const d = drawCircle(img); URL.revokeObjectURL(blobURL); resolve(d); }
+                        catch(e) { URL.revokeObjectURL(blobURL); resolve(null); }
+                    };
+                    img.onerror = () => { URL.revokeObjectURL(blobURL); resolve(null); };
+                    img.src = blobURL;
+                })
+                .catch(() => {
+                    // Fallback: Image directo (file:// o cuando fetch no disponible)
+                    const img = new Image();
+                    img.onload = () => { try { resolve(drawCircle(img)); } catch(e) { resolve(null); } };
+                    img.onerror = () => resolve(null);
+                    img.src = src;
+                });
+        });
+    }
+
+    window.generatePDFReport = async function () {
         if (typeof window.jspdf === 'undefined') {
             alert('La libreria PDF aun no ha cargado. Espera un momento y vuelve a intentarlo.');
             return;
@@ -200,84 +240,312 @@
             kpis = { mrr: last.avgMRR, arr: last.arr, nrr: last.nrr, churn: last.churnRate, nps: last.nps };
         }
 
-        /* ── PÁGINA 1: PORTADA ─────────────────────────────────────────────── */
-        // Header degradado
-        doc.setFillColor(...COLORS.primary);
-        doc.rect(0, 0, PW, 72, 'F');
-        doc.setFillColor(...COLORS.purple);
-        // Acento triangular derecha
-        doc.setFillColor(99, 102, 241);
-        doc.rect(PW - 8, 0, 8, 72, 'F');
+        const years = [...new Set(data.periodData.map(p => (p.Period||'').split('-')[0]))].filter(Boolean).sort();
+        const authorPhoto = await loadImageAsDataURL('tamara-profile.jpg');
 
-        doc.setTextColor(...COLORS.white);
+        /* ── PÁGINA 0: PORTADA PRINCIPAL ──────────────────────────────────── */
+
+        // Fondo completo azul marino (idéntico a portadas de sección)
+        doc.setFillColor(22, 40, 90);
+        doc.rect(0, 0, PW, PH, 'F');
+
+        // Línea fina decorativa
+        doc.setFillColor(80, 120, 200);
+        doc.rect(M, PH * 0.36, 40, 0.8, 'F');
+
+        // Título principal
+        doc.setTextColor(255, 255, 255);
         doc.setFont('helvetica', 'bold');
-        doc.setFontSize(26);
-        doc.text('Customer Success Analytics', M, 32);
-        doc.setFontSize(18);
-        doc.text('Informe Completo de Analisis', M, 48);
+        doc.setFontSize(28);
+        doc.text('Customer Success', M, PH * 0.36 + 14);
+        doc.text('Analytics', M, PH * 0.36 + 14 + 13);
+
+        // Subtítulo
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(11);
-        doc.text('Resumen ejecutivo · Health Score · Cuentas en riesgo · Plan de accion', M, 62);
+        doc.setTextColor(140, 175, 230);
+        doc.text('Informe Completo de Analisis', M, PH * 0.36 + 14 + 13 + 10);
 
-        // Metadata strip
-        doc.setFillColor(241, 245, 249);
-        doc.rect(0, 72, PW, 44, 'F');
-        doc.setTextColor(...COLORS.dark);
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'normal');
-        const years = [...new Set(data.periodData.map(p => (p.Period||'').split('-')[0]))].filter(Boolean).sort();
-        doc.text(`Fecha: ${dateStr}`, M, 87);
-        doc.text(`Cuentas analizadas: ${data.accounts.length}`, M, 99);
-        doc.text(`Periodos: ${years.length ? years[0] + ' - ' + years[years.length-1] : 'N/A'}`, M, 111);
+        // ── Footer rediseñado ─────────────────────────────────────────────
+        const p0FooterH  = 38;
+        const p0FooterY  = PH - p0FooterH;
 
-        // Banner demo
-        let yStart = 128;
-        if (isDemo) {
-            doc.setFillColor(...COLORS.warning);
-            doc.roundedRect(M, 120, CW, 12, 3, 3, 'F');
-            doc.setTextColor(...COLORS.white);
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(9);
-            doc.text('DATOS DE DEMOSTRACION — Carga tu Excel real para obtener tu informe personalizado', M + 4, 128);
-            yStart = 142;
+        // Banda footer ligeramente más clara que el fondo
+        doc.setFillColor(28, 50, 105);
+        doc.rect(0, p0FooterY, PW, p0FooterH, 'F');
+
+        // Línea separadora superior sutil
+        doc.setFillColor(60, 100, 180);
+        doc.rect(0, p0FooterY, PW, 0.6, 'F');
+
+        // — Lado izquierdo: foto + nombre + título —
+        const p0PhotoSize = 18;
+        const p0PhotoX    = M;
+        const p0PhotoCY   = p0FooterY + p0FooterH / 2;
+        const p0LinkedIn  = 'https://www.linkedin.com/in/tamarasanchezdiaz';
+        if (authorPhoto) {
+            try {
+                doc.addImage(authorPhoto, 'PNG', p0PhotoX, p0PhotoCY - p0PhotoSize / 2, p0PhotoSize, p0PhotoSize);
+            } catch(e) {}
         }
+        // Enlace clickable sobre la foto
+        doc.link(p0PhotoX, p0PhotoCY - p0PhotoSize / 2, p0PhotoSize, p0PhotoSize, { url: p0LinkedIn });
 
-        // KPI cards en portada (2 filas × 3 columnas)
-        const kpiBoxes = [
-            { label: 'MRR',               value: fmtCurrency(kpis.mrr),             color: COLORS.primary },
-            { label: 'ARR',               value: fmtCurrency(kpis.arr),             color: COLORS.purple  },
-            { label: 'NRR',               value: fmtPct(kpis.nrr),                  color: COLORS.success },
-            { label: 'Churn Rate',        value: fmtPct(kpis.churn),                color: COLORS.danger  },
-            { label: 'NPS',               value: String(Math.round(kpis.nps || 0)), color: COLORS.warning },
-            { label: 'Cuentas en Riesgo', value: String(atRisk.length),             color: COLORS.orange  },
+        const p0TextX = M + p0PhotoSize + 5;
+        doc.setTextColor(220, 235, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.text('Tamara Sanchez Diaz', p0TextX, p0PhotoCY - 4);
+        // Enlace clickable sobre el nombre
+        doc.link(p0TextX, p0PhotoCY - 9, doc.getTextWidth('Tamara Sanchez Diaz'), 6, { url: p0LinkedIn });
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(140, 175, 230);
+        doc.text('Customer Success Specialist', p0TextX, p0PhotoCY + 3);
+
+        // Separador vertical central
+        doc.setFillColor(50, 80, 150);
+        doc.rect(PW / 2 - 0.2, p0FooterY + 7, 0.4, p0FooterH - 14, 'F');
+
+        // — Lado derecho: fila superior (Cuentas · En riesgo · Periodos) + fila inferior (Fecha) —
+        const p0RightX = PW / 2 + 10;
+        const p0RightW = PW - M - p0RightX;
+        const periodStr = years.length ? years[0] + ' \u2013 ' + years[years.length - 1] : 'N/A';
+        const metaTop = [
+            { label: 'Cuentas',   value: String(data.accounts.length) },
+            { label: 'En riesgo', value: String(atRisk.length) },
+            { label: 'Periodos',  value: periodStr },
         ];
-        const bW = (CW - 10) / 3;
-        const bH = 28;
-        kpiBoxes.forEach((b, i) => {
-            const cx = M + (i % 3) * (bW + 5);
-            const cy = yStart + Math.floor(i / 3) * (bH + 5);
-            doc.setFillColor(...b.color);
-            doc.roundedRect(cx, cy, bW, bH, 4, 4, 'F');
-            doc.setTextColor(...COLORS.white);
+        const mgColW = p0RightW / 3;
+        const rowTop = p0FooterY + 10;
+        metaTop.forEach((item, i) => {
+            const mx = p0RightX + i * mgColW;
             doc.setFont('helvetica', 'bold');
-            doc.setFontSize(15);
-            doc.text(b.value, cx + bW / 2, cy + 12, { align: 'center' });
-            doc.setFontSize(8);
+            doc.setFontSize(10);
+            doc.setTextColor(200, 220, 255);
+            doc.text(item.value, mx, rowTop);
             doc.setFont('helvetica', 'normal');
-            doc.text(b.label, cx + bW / 2, cy + 22, { align: 'center' });
+            doc.setFontSize(6.5);
+            doc.setTextColor(80, 120, 180);
+            doc.text(item.label.toUpperCase(), mx, rowTop + 5);
+        });
+        // Fila inferior: Fecha centrada
+        const rowBot = p0FooterY + 26;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.setTextColor(200, 220, 255);
+        doc.text(dateStr, p0RightX, rowBot);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(6.5);
+        doc.setTextColor(80, 120, 180);
+        doc.text('FECHA', p0RightX, rowBot + 5);
+
+        /* ── PÁGINA 2: ÍNDICE + LEYENDA DE COLORES ──────────────────────── */
+        doc.addPage();
+        _pageHeader(doc, PW, M, '   Indice y Leyenda de Colores');
+
+        // Calcular numeración real de páginas según contenido
+        let nextPg = 3;
+        const tocEntries = [];
+        tocEntries.push({ page: '1', color: COLORS.dark, title: 'Portada',                    desc: 'Portada del informe - Customer Success Analytics' });
+        tocEntries.push({ page: '2', color: COLORS.dark, title: 'Indice y Leyenda de Colores', desc: 'Estructura del informe y significado de los colores' });
+        tocEntries.push({ page: String(nextPg++), color: COLORS.dark, title: 'Resumen Ejecutivo', desc: 'KPIs principales, cuentas analizadas y resultados globales' });
+        if (yearMetrics.length > 0)
+            tocEntries.push({ page: String(nextPg++), color: COLORS.dark, title: 'Evolucion Historica de Metricas', desc: 'MRR, ARR, NRR, Churn y NPS por ano' });
+        tocEntries.push({ page: String(nextPg++), color: COLORS.dark, title: 'Analisis de Salud de Cuentas', desc: 'Health Score, adopcion y nivel de riesgo de cada cuenta' });
+        atRisk.forEach(a => {
+            const badge = a.riskLevel === 'critical' ? 'CRITICO' : 'EN RIESGO';
+            tocEntries.push({ page: String(nextPg++), color: a.riskLevel === 'critical' ? COLORS.danger : COLORS.orange,
+                title: 'Plan de Accion — ' + (a.Account_Name || a.Account_ID),
+                desc: badge + ' · Health Score: ' + a.healthScore + ' / 100' });
         });
 
-        // Footer portada
-        doc.setFillColor(...COLORS.dark);
-        doc.rect(0, PH - 14, PW, 14, 'F');
-        doc.setTextColor(...COLORS.white);
-        doc.setFontSize(8);
-        doc.text('Customer Success Analytics Platform  |  customersuccessanalityc.vercel.app', PW / 2, PH - 5, { align: 'center' });
+        // Dibujar índice
+        let yIdx = 34;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor(...COLORS.dark);
+        doc.text('Indice de Contenidos', M, yIdx);
+        yIdx += 2;
 
-        /* ── PÁGINA 2: EVOLUCIÓN HISTÓRICA ─────────────────────────────────── */
+        tocEntries.forEach((entry, i) => {
+            const indentX = entry.indent ? 10 : 0;
+            yIdx += entry.isSection ? 11 : 9;
+            if (i % 2 === 0) {
+                doc.setFillColor(245, 247, 252);
+                doc.rect(M, yIdx - 5, CW, entry.isSection ? 11 : 9, 'F');
+            }
+            doc.setFillColor(...entry.color);
+            if (entry.isSection) {
+                doc.roundedRect(M + indentX, yIdx - 4, 4, entry.isSection ? 7 : 5, 1, 1, 'F');
+            } else {
+                doc.circle(M + indentX + 2.5, yIdx - 0.8, 1.5, 'F');
+            }
+            doc.setFont('helvetica', entry.isSection ? 'bold' : 'normal');
+            doc.setFontSize(8.5);
+            doc.setTextColor(...entry.color);
+            doc.text('Pag. ' + entry.page, M + indentX + 7, yIdx);
+            doc.setTextColor(...COLORS.dark);
+            doc.setFont('helvetica', entry.isSection ? 'bold' : 'normal');
+            doc.setFontSize(entry.isSection ? 9 : 8.5);
+            doc.text(entry.title, M + indentX + 26, yIdx);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(7.5);
+            doc.setTextColor(...COLORS.muted);
+            doc.text(entry.desc, M + indentX + 26, yIdx + 3.8);
+            yIdx += entry.isSection ? 4 : 3;
+        });
+
+        // Leyenda de colores
+        yIdx += 14;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor(...COLORS.dark);
+        doc.text('Leyenda de Colores', M, yIdx);
+        yIdx += 2;
+
+        const legend = [
+            { color: COLORS.primary,  name: 'Azul',    use: 'KPIs principales, cabeceras de tabla y secciones de navegacion' },
+            { color: COLORS.success,  name: 'Verde',   use: 'Resultados positivos y cuentas en estado Excelente (Health ≥ 80)' },
+            { color: [251, 191, 36],  name: 'Amarillo',use: 'Cuentas en estado Bueno (Health 60-79), advertencias leves' },
+            { color: COLORS.orange,   name: 'Naranja', use: 'Cuentas En Riesgo (Health 40-59), atencion recomendada' },
+            { color: COLORS.danger,   name: 'Rojo',    use: 'Cuentas en estado Critico (Health < 40), accion urgente' },
+            { color: COLORS.purple,   name: 'Morado',  use: 'Metricas de engagement y actividad del producto' },
+            { color: COLORS.dark,     name: 'Marino',  use: 'Cabeceras de secciones, portadas y elementos estructurales' },
+            { color: COLORS.muted,    name: 'Gris',    use: 'Textos secundarios, etiquetas y datos de contexto' },
+        ];
+
+        legend.forEach((l, i) => {
+            yIdx += 9;
+            if (i % 2 === 0) {
+                doc.setFillColor(245, 247, 252);
+                doc.rect(M, yIdx - 5, CW, 9, 'F');
+            }
+            doc.setFillColor(...l.color);
+            doc.roundedRect(M, yIdx - 4, 6, 5.5, 1, 1, 'F');
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(8.5);
+            doc.setTextColor(...l.color);
+            doc.text(l.name, M + 10, yIdx);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(8);
+            doc.setTextColor(...COLORS.dark);
+            doc.text(l.use, M + 36, yIdx);
+        });
+
+        /* ── PÁGINA 3: RESUMEN EJECUTIVO ──────────────────────────────────── */
+        doc.addPage();
+        _pageHeader(doc, PW, M, '   Resumen Ejecutivo');
+
+        // Banner demo
+        let yKpi = 32;
+        if (isDemo) {
+            doc.setFillColor(...COLORS.warning);
+            doc.roundedRect(M, yKpi, CW, 9, 2, 2, 'F');
+            doc.setTextColor(...COLORS.white);
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(7.5);
+            doc.text('DATOS DE DEMOSTRACION — Carga tu Excel real para obtener tu informe personalizado', M + 4, yKpi + 6);
+            yKpi += 14;
+        }
+
+        // ── Resultados Globales ───────────────────────────────────────────────
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7);
+        doc.setTextColor(...COLORS.muted);
+        doc.text('RESULTADOS GLOBALES', M, yKpi);
+        doc.setFillColor(...COLORS.muted);
+        doc.rect(M + 52, yKpi - 1, CW - 52, 0.4, 'F');
+        yKpi += 5;
+
+        const kpiBoxes = [
+            { label: 'MRR',               value: fmtCurrency(kpis.mrr) },
+            { label: 'ARR',               value: fmtCurrency(kpis.arr) },
+            { label: 'NRR',               value: fmtPct(kpis.nrr)      },
+            { label: 'Churn Rate',        value: fmtPct(kpis.churn)    },
+            { label: 'NPS',               value: String(Math.round(kpis.nps || 0)) },
+            { label: 'Cuentas en Riesgo', value: String(atRisk.length) },
+        ];
+        const bW = (CW - 10) / 3;
+        const bH = 22;
+        kpiBoxes.forEach((b, i) => {
+            const cx = M + (i % 3) * (bW + 5);
+            const cy = yKpi + Math.floor(i / 3) * (bH + 3);
+            doc.setFillColor(...COLORS.dark);
+            doc.roundedRect(cx, cy, bW, bH, 3, 3, 'F');
+            doc.setFillColor(80, 120, 200);
+            doc.rect(cx, cy, bW, 1.2, 'F');
+            doc.setTextColor(...COLORS.white);
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(12);
+            doc.text(b.value, cx + bW / 2, cy + 10, { align: 'center' });
+            doc.setFontSize(6.5);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(180, 205, 255);
+            doc.text(b.label, cx + bW / 2, cy + bH - 4, { align: 'center' });
+        });
+
+        // ── Cuentas Analizadas ────────────────────────────────────────────────
+        let yAcc = yKpi + 2 * (bH + 3) + 10;
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(7);
+        doc.setTextColor(...COLORS.muted);
+        doc.text('CUENTAS ANALIZADAS', M, yAcc);
+        doc.setFillColor(...COLORS.muted);
+        doc.rect(M + 52, yAcc - 1, CW - 52, 0.4, 'F');
+        yAcc += 5;
+
+        const colW = (CW - 6) / 2;
+        const riskDotColor = am => {
+            if (!am) return COLORS.muted;
+            return am.riskLevel === 'excellent' ? COLORS.success
+                 : am.riskLevel === 'good'      ? [251, 191, 36]
+                 : am.riskLevel === 'at-risk'   ? COLORS.orange
+                 : COLORS.danger;
+        };
+        const riskStatusLabel = am => {
+            if (!am) return '';
+            return am.riskLevel === 'excellent' ? 'Excelente'
+                 : am.riskLevel === 'good'      ? 'Bueno'
+                 : am.riskLevel === 'at-risk'   ? 'En Riesgo'
+                 : 'Critico';
+        };
+
+        data.accounts.forEach((acc, i) => {
+            const col = i % 2;
+            const row = Math.floor(i / 2);
+            const x   = M + col * (colW + 6);
+            const y   = yAcc + row * 8.5;
+            if (y > PH - 20) return;
+            const am = accountMetrics.find(a => a.Account_ID === acc.Account_ID);
+            const dc = riskDotColor(am);
+            if (row % 2 === 0 && col === 0) {
+                doc.setFillColor(...COLORS.light);
+                doc.rect(M, y - 3.5, CW, 8.5, 'F');
+            }
+            doc.setFillColor(...dc);
+            doc.circle(x + 2, y - 0.5, 1.5, 'F');
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(7.5);
+            doc.setTextColor(...COLORS.dark);
+            const accName = doc.splitTextToSize(acc.Account_Name || acc.Account_ID, colW - 28);
+            doc.text(accName[0], x + 6, y);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(6.5);
+            doc.setTextColor(...COLORS.muted);
+            doc.text(fmtCurrency(parseFloat(acc.MRR_Current) || 0) + ' MRR', x + colW - 1, y, { align: 'right' });
+            doc.setFontSize(6);
+            doc.setTextColor(...dc);
+            doc.text(riskStatusLabel(am), x + 6, y + 3.2);
+        });
+
+        /* ── PÁGINA 4: EVOLUCIÓN HISTÓRICA ──────────────────────────────────── */
         if (yearMetrics.length > 0) {
             doc.addPage();
-            _pageHeader(doc, PW, M, '   Evolucion Historica de Metricas', COLORS.primary, '2');
+            _sectionCover(doc, PW, PH, M, CW, '01', 'Evolucion Historica de Metricas', 'Analisis de tendencias  ·  MRR, ARR, NRR, Churn y NPS');
+            doc.addPage();
+            _pageHeader(doc, PW, M, '   Evolucion Historica de Metricas');
 
             doc.autoTable({
                 startY: 32,
@@ -287,7 +555,7 @@
                     return [m.year, fmtCurrency(m.avgMRR), fmtCurrency(m.arr), fmtPct(m.nrr), fmtPct(m.churnRate), String(m.nps), st];
                 }),
                 styles:          { fontSize: 9, cellPadding: 4, textColor: COLORS.dark },
-                headStyles:      { fillColor: COLORS.primary, textColor: COLORS.white, fontStyle: 'bold', fontSize: 9 },
+                headStyles:      { fillColor: COLORS.dark, textColor: COLORS.white, fontStyle: 'bold', fontSize: 9 },
                 alternateRowStyles: { fillColor: COLORS.light },
                 columnStyles:    { 0: { fontStyle: 'bold', cellWidth: 18 }, 6: { cellWidth: 24 } },
                 margin:          { left: M, right: M },
@@ -302,8 +570,8 @@
 
                 doc.setFillColor(240, 249, 255);
                 doc.roundedRect(M, fy, CW, 26, 4, 4, 'F');
-                doc.setFillColor(...COLORS.primary);
-                doc.roundedRect(M, fy, 3, 26, 2, 2, 'F');
+                doc.setFillColor(...COLORS.dark);
+                doc.roundedRect(M, fy, 1.5, 26, 1, 1, 'F');
                 doc.setTextColor(...COLORS.dark);
                 doc.setFont('helvetica', 'bold');
                 doc.setFontSize(10);
@@ -314,9 +582,11 @@
             }
         }
 
-        /* ── PÁGINA 3: ANÁLISIS DE CUENTAS ─────────────────────────────────── */
+        /* ── ANÁLISIS DE CUENTAS ──────────────────────────────────────────── */
         doc.addPage();
-        _pageHeader(doc, PW, M, '   Analisis de Salud de Cuentas', COLORS.primary, '3');
+        _sectionCover(doc, PW, PH, M, CW, '02', 'Analisis de Salud de Cuentas', 'Health Score · Adopcion · Nivel de riesgo');
+        doc.addPage();
+        _pageHeader(doc, PW, M, '   Analisis de Salud de Cuentas');
 
         // Contadores de riesgo
         const rc = { excellent: 0, good: 0, atRisk: 0, critical: 0 };
@@ -365,13 +635,17 @@
                 ];
             }),
             styles:             { fontSize: 8, cellPadding: 3, textColor: COLORS.dark },
-            headStyles:         { fillColor: COLORS.primary, textColor: COLORS.white, fontStyle: 'bold', fontSize: 8 },
+                headStyles:         { fillColor: COLORS.dark, textColor: COLORS.white, fontStyle: 'bold', fontSize: 8 },
             alternateRowStyles: { fillColor: COLORS.light },
             columnStyles:       { 0: { fontStyle: 'bold', cellWidth: 32 }, 2: { cellWidth: 20 }, 7: { cellWidth: 22 } },
             margin:             { left: M, right: M },
         });
 
-        /* ── PÁGINAS 4+: UNA PÁGINA POR CUENTA EN RIESGO ────────────────────── */
+        /* ── PLANES DE ACCIÓN ─────────────────────────────────────────────── */
+        if (atRisk.length > 0) {
+            doc.addPage();
+            _sectionCover(doc, PW, PH, M, CW, '03', 'Planes de Accion', 'Estrategia detallada para cuentas en riesgo o estado critico');
+        }
         atRisk.forEach((account, idx) => {
             const plan        = buildPlan(account);
             const isCritical  = account.riskLevel === 'critical';
@@ -380,14 +654,14 @@
             const tixNum = comp.tickets != null ? comp.tickets : (account.Open_Tickets || 0);
 
             doc.addPage();
-            const pageLabel = '   Cuenta ' + (idx + 1) + ' / ' + atRisk.length + ' — Plan de Accion';
-            _pageHeader(doc, PW, M, pageLabel, headerColor, String(4 + idx));
+            const pageLabel = '   ' + (account.Account_Name || account.Account_ID) + ' — Plan de Accion';
+            _pageHeader(doc, PW, M, pageLabel);
 
             // ── Ficha resumen de cuenta ──────────────────────────────────────
             doc.setFillColor(...(isCritical ? [255, 245, 245] : [255, 250, 240]));
             doc.roundedRect(M, 28, CW, 30, 3, 3, 'F');
             doc.setFillColor(...headerColor);
-            doc.roundedRect(M, 28, 4, 30, 2, 2, 'F');
+            doc.roundedRect(M, 28, 2, 30, 1, 1, 'F');
 
             // Nombre + Health Score
             doc.setTextColor(...headerColor);
@@ -443,8 +717,9 @@
     };
 
     /* ── HELPER: cabecera de página ──────────────────────────────────────────── */
-    function _pageHeader(doc, PW, M, title, color, pageNum) {
-        doc.setFillColor(...color);
+    function _pageHeader(doc, PW, M, title) {
+        const pageNum = doc.internal.getCurrentPageInfo().pageNumber;
+        doc.setFillColor(...COLORS.dark);
         doc.rect(0, 0, PW, 25, 'F');
         doc.setTextColor(255, 255, 255);
         doc.setFont('helvetica', 'bold');
@@ -452,7 +727,33 @@
         doc.text(title, M, 17);
         doc.setFontSize(9);
         doc.setFont('helvetica', 'normal');
-        doc.text('Pagina ' + pageNum, PW - M, 17, { align: 'right' });
+        doc.text('Pag. ' + pageNum, PW - M, 17, { align: 'right' });
+    }
+
+    /* ── HELPER: portada de sección ───────────────────────────────────── */
+    function _sectionCover(doc, PW, PH, M, CW, numStr, title, subtitle) {
+        // Fondo completo azul marino
+        doc.setFillColor(22, 40, 90);
+        doc.rect(0, 0, PW, PH, 'F');
+        // Número grande decorativo (muy oscuro = efecto sutil)
+        doc.setTextColor(30, 55, 110);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(130);
+        doc.text(numStr, PW - M, PH * 0.72, { align: 'right' });
+        // Línea fina decorativa
+        doc.setFillColor(80, 120, 200);
+        doc.rect(M, PH * 0.42, 40, 0.8, 'F');
+        // Título sección
+        doc.setTextColor(255, 255, 255);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(28);
+        const titleLines = doc.splitTextToSize(title, CW * 0.72);
+        doc.text(titleLines, M, PH * 0.42 + 14);
+        // Subtítulo
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(11);
+        doc.setTextColor(140, 175, 230);
+        doc.text(subtitle, M, PH * 0.42 + 14 + titleLines.length * 12 + 4);
     }
 
     /* ── HELPER: bloque de sección con titulo coloreado + bullets ───────────── */
@@ -460,7 +761,7 @@
     function _sectionBlock(doc, PW, M, CW, PH, yTop, title, color, items) {
         const lineH   = 5.5;   // altura de línea de texto (mm)
         const padV    = 5;     // padding vertical interior
-        const titleH  = 10;    // altura de la barra de titulo
+        const titleH  = 7;     // altura de la barra de titulo
         const textW   = CW - 14;
 
         // Pre-calcular altura total del bloque
@@ -490,16 +791,16 @@
 
         // Barra de título
         doc.setFillColor(...color);
-        doc.roundedRect(M, yTop, CW, titleH, 3, 3, 'F');
+        doc.roundedRect(M, yTop, CW, titleH, 2, 2, 'F');
         doc.rect(M, yTop + titleH / 2, CW, titleH / 2, 'F'); // esquinas inferiores rectas
         doc.setTextColor(...COLORS.white);
         doc.setFont('helvetica', 'bold');
-        doc.setFontSize(9);
-        doc.text(title, M + 5, yTop + 7);
+        doc.setFontSize(8.5);
+        doc.text(title, M + 5, yTop + 5.2);
 
         // Barra lateral de acento
         doc.setFillColor(...color);
-        doc.rect(M, yTop + titleH, 3, blockH - titleH, 'F');
+        doc.rect(M, yTop + titleH, 1.5, blockH - titleH, 'F');
 
         // Items
         let yText = yTop + titleH + padV + lineH - 1;
