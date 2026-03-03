@@ -264,7 +264,7 @@
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(11);
         doc.setTextColor(140, 175, 230);
-        doc.text('Informe Completo de Analisis', M, PH * 0.36 + 14 + 13 + 10);
+        doc.text('Informe Completo de An\u00e1lisis', M, PH * 0.36 + 14 + 13 + 10);
 
         // ── Footer rediseñado ─────────────────────────────────────────────
         const p0FooterH  = 38;
@@ -353,7 +353,7 @@
         tocEntries.push({ page: String(nextPg++), color: COLORS.dark, title: 'Resumen Ejecutivo', desc: 'KPIs principales, cuentas analizadas y resultados globales' });
         if (yearMetrics.length > 0)
             tocEntries.push({ page: String(nextPg++), color: COLORS.dark, title: 'Evolucion Historica de Metricas', desc: 'MRR, ARR, NRR, Churn y NPS por ano' });
-        tocEntries.push({ page: String(nextPg++), color: COLORS.dark, title: 'Analisis de Salud de Cuentas', desc: 'Health Score, adopcion y nivel de riesgo de cada cuenta' });
+        tocEntries.push({ page: String(nextPg++), color: COLORS.dark, title: 'An\u00e1lisis de Salud de Cuentas', desc: 'Health Score, adopcion y nivel de riesgo de cada cuenta' });
         atRisk.forEach(a => {
             const badge = a.riskLevel === 'critical' ? 'CRITICO' : 'EN RIESGO';
             tocEntries.push({ page: String(nextPg++), color: a.riskLevel === 'critical' ? COLORS.danger : COLORS.orange,
@@ -543,7 +543,7 @@
         /* ── PÁGINA 4: EVOLUCIÓN HISTÓRICA ──────────────────────────────────── */
         if (yearMetrics.length > 0) {
             doc.addPage();
-            _sectionCover(doc, PW, PH, M, CW, '01', 'Evolucion Historica de Metricas', 'Analisis de tendencias  ·  MRR, ARR, NRR, Churn y NPS');
+            _sectionCover(doc, PW, PH, M, CW, '01', 'Evolucion Historica de Metricas', 'An\u00e1lisis de tendencias  \u00b7  MRR, ARR, NRR, Churn y NPS');
             doc.addPage();
             _pageHeader(doc, PW, M, '   Evolucion Historica de Metricas');
 
@@ -584,9 +584,9 @@
 
         /* ── ANÁLISIS DE CUENTAS ──────────────────────────────────────────── */
         doc.addPage();
-        _sectionCover(doc, PW, PH, M, CW, '02', 'Analisis de Salud de Cuentas', 'Health Score · Adopcion · Nivel de riesgo');
+        _sectionCover(doc, PW, PH, M, CW, '02', 'An\u00e1lisis de Salud de Cuentas', 'Health Score \u00b7 Adopci\u00f3n \u00b7 Nivel de riesgo');
         doc.addPage();
-        _pageHeader(doc, PW, M, '   Analisis de Salud de Cuentas');
+        _pageHeader(doc, PW, M, '   An\u00e1lisis de Salud de Cuentas');
 
         // Contadores de riesgo
         const rc = { excellent: 0, good: 0, atRisk: 0, critical: 0 };
