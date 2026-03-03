@@ -870,7 +870,7 @@ function renderQuarterlyCharts() {
                 legend: { display: false },
                 tooltip: {
                     callbacks: {
-                        label: (context) => 'MRR: $' + context.parsed.y.toLocaleString()
+                        label: (context) => 'MRR: ' + context.parsed.y.toLocaleString('es-ES') + ' €'
                     }
                 }
             },
@@ -1023,9 +1023,9 @@ function loadFromLocalStorage() {
 }
 
 function formatCurrency(value) {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('es-ES', {
         style: 'currency',
-        currency: 'USD',
+        currency: 'EUR',
         minimumFractionDigits: 0,
         maximumFractionDigits: 0
     }).format(value);

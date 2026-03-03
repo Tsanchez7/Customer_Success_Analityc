@@ -6,7 +6,7 @@
     'use strict';
 
     /* ── UTILIDADES ──────────────────────────────────────────────────────────── */
-    const fmtCurrency = v => '$' + Math.round(v || 0).toLocaleString('en-US');
+    const fmtCurrency = v => Math.round(v || 0).toLocaleString('es-ES') + ' €';
     const fmtPct      = v => (parseFloat(v) || 0).toFixed(1) + '%';
 
     const COLORS = {

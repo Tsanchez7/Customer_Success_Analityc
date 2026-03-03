@@ -309,9 +309,9 @@ function createHelpPanel() {
                         </div>
                         <div class="help-metric-example">
                             <strong>Ejemplo:</strong><br>
-                            • Cliente A (Health: 45) - MRR: $3,000<br>
-                            • Cliente B (Health: 38) - MRR: $5,000<br>
-                            • Cliente C (Health: 85) - MRR: $10,000<br>
+                            • Cliente A (Health: 45) - MRR: 3.000 €<br>
+                            • Cliente B (Health: 38) - MRR: 5.000 €<br>
+                            • Cliente C (Health: 85) - MRR: 10.000 €<br>
                             <strong>Revenue at Risk = $8,000</strong> (solo A y B)
                         </div>
                         <div class="help-metric-interpretation">

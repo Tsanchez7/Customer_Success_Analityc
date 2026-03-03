@@ -528,7 +528,7 @@ function renderForecastCharts(historicalMetrics, forecast) {
                 legend: { display: true },
                 tooltip: {
                     callbacks: {
-                        label: (context) => context.dataset.label + ': $' + (context.parsed.y || 0).toLocaleString()
+                        label: (context) => context.dataset.label + ': ' + (context.parsed.y || 0).toLocaleString('es-ES') + ' €'
                     }
                 }
             },
@@ -736,9 +736,9 @@ function loadFromLocalStorage() {
 }
 
 function formatCurrency(value) {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('es-ES', {
         style: 'currency',
-        currency: 'USD',
+        currency: 'EUR',
         minimumFractionDigits: 0,
         maximumFractionDigits: 0
     }).format(value);
