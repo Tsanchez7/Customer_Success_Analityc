@@ -391,6 +391,7 @@
 
         /* ── PÁGINA 3: RESUMEN EJECUTIVO ──────────────────────────────────── */
         doc.addPage();
+        pgResumen = doc.internal.getNumberOfPages();
         _pageHeader(doc, PW, M, '   Resumen Ejecutivo');
 
         // Banner demo
@@ -882,16 +883,18 @@
         doc.setPage(tocPageNumber);
         _pageHeader(doc, PW, M, '   Índice y Leyenda de Colores');
 
+        const fmtPage = p => (typeof p === 'number' && Number.isFinite(p)) ? String(p) : '-';
+
         const tocEntries = [];
-        tocEntries.push({ page: String(pgResumen), color: COLORS.dark, title: 'Resumen Ejecutivo', desc: 'KPIs principales, cuentas analizadas y resultados globales' });
+        tocEntries.push({ page: fmtPage(pgResumen), color: COLORS.dark, title: 'Resumen Ejecutivo', desc: 'KPIs principales, cuentas analizadas y resultados globales' });
         if (pgHistorico)
-            tocEntries.push({ page: String(pgHistorico), color: COLORS.dark, title: 'Evolución Histórica de Métricas', desc: 'MRR, ARR, NRR, Churn y NPS por año' });
+            tocEntries.push({ page: fmtPage(pgHistorico), color: COLORS.dark, title: 'Evolución Histórica de Métricas', desc: 'MRR, ARR, NRR, Churn y NPS por año' });
         if (pgAncla)
-            tocEntries.push({ page: String(pgAncla), color: COLORS.warning, title: 'Cuentas Ancla — Motor Financiero', desc: 'Ranking de estabilidad, longevidad y valor económico por cuenta' });
+            tocEntries.push({ page: fmtPage(pgAncla), color: COLORS.warning, title: 'Cuentas Ancla — Motor Financiero', desc: 'Ranking de estabilidad, longevidad y valor económico por cuenta' });
         if (pgPlanResumen)
-            tocEntries.push({ page: String(pgPlanResumen), color: COLORS.dark, title: 'Plan de Actuación — Resumen', desc: 'Cuentas con Health Score < 60: factores de riesgo y acciones' });
+            tocEntries.push({ page: fmtPage(pgPlanResumen), color: COLORS.dark, title: 'Plan de Actuación — Resumen', desc: 'Cuentas con Health Score < 60: factores de riesgo y acciones' });
         if (pgSalud)
-            tocEntries.push({ page: String(pgSalud), color: COLORS.dark, title: 'Análisis de Salud de Cuentas', desc: 'Health Score, adopción y nivel de riesgo de cada cuenta' });
+            tocEntries.push({ page: fmtPage(pgSalud), color: COLORS.dark, title: 'Análisis de Salud de Cuentas', desc: 'Health Score, adopción y nivel de riesgo de cada cuenta' });
         if (pgPlanesStart && pgPlanesEnd) {
             tocEntries.push({ 
                 page: pgPlanesStart + '-' + pgPlanesEnd, 
