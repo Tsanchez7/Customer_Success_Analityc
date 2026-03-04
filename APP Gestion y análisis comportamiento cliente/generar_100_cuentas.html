@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generador 100 Cuentas — Customer Success Analytics</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+  .card { background: #1e293b; border-radius: 16px; padding: 2.5rem; max-width: 640px; width: 90%; box-shadow: 0 25px 50px rgba(0,0,0,.5); }
+  h1 { font-size: 1.7rem; font-weight: 700; color: #fff; margin-bottom: .4rem; }
+  .sub { color: #94a3b8; margin-bottom: 2rem; font-size: 0.95rem; }
+  .stats-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; margin-bottom: 2rem; }
+  .stat { background: #0f172a; border-radius: 10px; padding: 1rem; text-align: center; }
+  .stat-val { font-size: 1.6rem; font-weight: 700; color: #38bdf8; }
+  .stat-lbl { font-size: .75rem; color: #64748b; margin-top: .25rem; }
+  .info-box { background: #0f172a; border-left: 3px solid #38bdf8; border-radius: 8px; padding: 1rem 1.2rem; margin-bottom: 1.5rem; font-size: .85rem; line-height: 1.7; color: #94a3b8; }
+  .info-box strong { color: #e2e8f0; }
+  .btn { width: 100%; padding: 1rem; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: all .2s; }
+  .btn-primary { background: linear-gradient(135deg, #3b82f6, #6366f1); color: #fff; }
+  .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(99,102,241,.4); }
+  .btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+  #progress { margin-top: 1.2rem; display: none; }
+  .bar-bg { background: #0f172a; border-radius: 99px; height: 8px; overflow: hidden; margin: .5rem 0; }
+  .bar-fill { height: 100%; background: linear-gradient(90deg,#3b82f6,#6366f1); border-radius: 99px; transition: width .3s; width: 0%; }
+  .log { font-size: .8rem; color: #64748b; margin-top: .5rem; min-height: 1.2em; }
+  .done-box { display: none; background: #052e16; border: 1px solid #16a34a; border-radius: 10px; padding: 1rem; margin-top: 1rem; text-align: center; color: #4ade80; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>📊 Generador de 100 Cuentas</h1>
+  <p class="sub">Crea un Excel realista listo para cargar en Customer Success Analytics</p>
+
+  <div class="stats-grid">
+    <div class="stat"><div class="stat-val">100</div><div class="stat-lbl">Cuentas</div></div>
+    <div class="stat"><div class="stat-val">4.400</div><div class="stat-lbl">Registros Period_Data</div></div>
+    <div class="stat"><div class="stat-val">8.800</div><div class="stat-lbl">Respuestas NPS</div></div>
+  </div>
+
+  <div class="info-box">
+    <strong>Qué incluye el Excel:</strong><br>
+    • <strong>Accounts</strong> — 100 cuentas con segmentos Enterprise, Mid-Market y SMB<br>
+    • <strong>Period_Data</strong> — Historial trimestral 2016–2026 (10 años) por cuenta<br>
+    • <strong>NPS_Data</strong> — 2 respuestas NPS por cuenta y trimestre<br><br>
+    <strong>Distribución del portfolio:</strong><br>
+    • 20 cuentas Enterprise (MRR alto, alta salud)<br>
+    • 45 cuentas Mid-Market (MRR medio, salud variada)<br>
+    • 35 cuentas SMB (MRR bajo, mayor riesgo)
+  </div>
+
+  <button class="btn btn-primary" id="btn" onclick="generate()">🚀 Generar y Descargar Excel</button>
+
+  <div id="progress">
+    <div class="bar-bg"><div class="bar-fill" id="bar"></div></div>
+    <div class="log" id="log">Iniciando...</div>
+  </div>
+
+  <div class="done-box" id="done">
+    ✅ Excel generado correctamente — revisa tus Descargas
+  </div>
+</div>
+
+<script>
+// ── CATÁLOGO DE EMPRESAS ──────────────────────────────────────────────────────
+const COMPANIES = [
+  // Enterprise (20)
+  { name:'TechVentures Inc.',       seg:'Enterprise',  mrr:32000, lic:200, nps:8.8, usage:91, tickets:1, base:9200,  csm:'Ana García'    },
+  { name:'DataSphere Corp',         seg:'Enterprise',  mrr:28500, lic:180, nps:9.1, usage:94, tickets:0, base:8100,  csm:'Carlos Ruiz'   },
+  { name:'GlobalSync Group',        seg:'Enterprise',  mrr:45000, lic:280, nps:9.3, usage:96, tickets:1, base:12000, csm:'María López'   },
+  { name:'DigitalCore AG',          seg:'Enterprise',  mrr:22000, lic:140, nps:8.2, usage:83, tickets:2, base:6300,  csm:'Ana García'    },
+  { name:'CloudPeak Enterprise',    seg:'Enterprise',  mrr:38000, lic:230, nps:8.7, usage:89, tickets:1, base:10500, csm:'Carlos Ruiz'   },
+  { name:'InnovateCorp Global',     seg:'Enterprise',  mrr:51000, lic:320, nps:9.0, usage:92, tickets:0, base:14000, csm:'Pedro Martín'  },
+  { name:'Apex Systems Ltd',        seg:'Enterprise',  mrr:19500, lic:125, nps:7.9, usage:78, tickets:3, base:5600,  csm:'María López'   },
+  { name:'NexGen Solutions',        seg:'Enterprise',  mrr:41000, lic:260, nps:9.1, usage:95, tickets:1, base:11200, csm:'Ana García'    },
+  { name:'Quantum Analytics',       seg:'Enterprise',  mrr:35500, lic:210, nps:8.5, usage:87, tickets:2, base:9800,  csm:'Carlos Ruiz'   },
+  { name:'Stratosphere Inc.',       seg:'Enterprise',  mrr:29000, lic:185, nps:8.8, usage:90, tickets:1, base:8200,  csm:'Pedro Martín'  },
+  { name:'FutureScale Corp',        seg:'Enterprise',  mrr:44000, lic:270, nps:9.2, usage:93, tickets:0, base:12300, csm:'María López'   },
+  { name:'Pinnacle Tech Group',     seg:'Enterprise',  mrr:26500, lic:165, nps:8.4, usage:85, tickets:2, base:7600,  csm:'Ana García'    },
+  { name:'Meridian Software',       seg:'Enterprise',  mrr:33000, lic:205, nps:8.9, usage:91, tickets:1, base:9400,  csm:'Carlos Ruiz'   },
+  { name:'Orbital Dynamics',        seg:'Enterprise',  mrr:48000, lic:300, nps:9.0, usage:94, tickets:0, base:13200, csm:'Pedro Martín'  },
+  { name:'StellarOps Ltd',          seg:'Enterprise',  mrr:21000, lic:135, nps:8.1, usage:80, tickets:3, base:6000,  csm:'María López'   },
+  { name:'ClearPath Analytics',     seg:'Enterprise',  mrr:37500, lic:230, nps:8.6, usage:88, tickets:1, base:10400, csm:'Ana García'    },
+  { name:'Nexus Innovations',       seg:'Enterprise',  mrr:53000, lic:340, nps:9.4, usage:97, tickets:0, base:14600, csm:'Carlos Ruiz'   },
+  { name:'Horizon Enterprise',      seg:'Enterprise',  mrr:24000, lic:155, nps:8.3, usage:82, tickets:2, base:6900,  csm:'Pedro Martín'  },
+  { name:'Vector Technologies',     seg:'Enterprise',  mrr:39500, lic:245, nps:8.8, usage:90, tickets:1, base:10900, csm:'María López'   },
+  { name:'Cascade Solutions',       seg:'Enterprise',  mrr:30000, lic:190, nps:8.7, usage:87, tickets:1, base:8500,  csm:'Ana García'    },
+  // Mid-Market (45)
+  { name:'CloudPeak Solutions',     seg:'Mid-Market',  mrr:12500, lic:80,  nps:7.5, usage:74, tickets:3, base:3600,  csm:'Laura Sánchez' },
+  { name:'InnovateLabs',            seg:'Mid-Market',  mrr:9800,  lic:65,  nps:7.0, usage:68, tickets:4, base:2900,  csm:'Pedro Martín'  },
+  { name:'BrightPath Systems',      seg:'Mid-Market',  mrr:14200, lic:90,  nps:7.8, usage:77, tickets:2, base:4100,  csm:'Laura Sánchez' },
+  { name:'SpeedData Inc.',          seg:'Mid-Market',  mrr:11000, lic:72,  nps:7.2, usage:71, tickets:3, base:3200,  csm:'Carlos Ruiz'   },
+  { name:'Agile Metrics Co',        seg:'Mid-Market',  mrr:8500,  lic:55,  nps:6.9, usage:65, tickets:5, base:2600,  csm:'Ana García'    },
+  { name:'FlowState Tech',          seg:'Mid-Market',  mrr:15800, lic:100, nps:8.0, usage:80, tickets:2, base:4500,  csm:'Laura Sánchez' },
+  { name:'BlueSky Analytics',       seg:'Mid-Market',  mrr:13000, lic:85,  nps:7.6, usage:75, tickets:3, base:3800,  csm:'Pedro Martín'  },
+  { name:'CoreBridge Ltd',          seg:'Mid-Market',  mrr:10200, lic:68,  nps:7.1, usage:69, tickets:4, base:3000,  csm:'María López'   },
+  { name:'PulseMetrics',            seg:'Mid-Market',  mrr:16500, lic:105, nps:8.2, usage:82, tickets:1, base:4700,  csm:'Carlos Ruiz'   },
+  { name:'Synapse Software',        seg:'Mid-Market',  mrr:9200,  lic:60,  nps:6.8, usage:63, tickets:5, base:2800,  csm:'Laura Sánchez' },
+  { name:'GridLogic Systems',       seg:'Mid-Market',  mrr:11800, lic:78,  nps:7.4, usage:73, tickets:3, base:3500,  csm:'Ana García'    },
+  { name:'TrueLayer Corp',          seg:'Mid-Market',  mrr:14800, lic:95,  nps:7.9, usage:78, tickets:2, base:4300,  csm:'Pedro Martín'  },
+  { name:'AlphaDrive Inc.',         seg:'Mid-Market',  mrr:8800,  lic:58,  nps:6.7, usage:61, tickets:6, base:2700,  csm:'María López'   },
+  { name:'KeyStar Solutions',       seg:'Mid-Market',  mrr:17200, lic:110, nps:8.1, usage:81, tickets:2, base:4900,  csm:'Carlos Ruiz'   },
+  { name:'PrimeCloud Ltd',          seg:'Mid-Market',  mrr:12000, lic:80,  nps:7.5, usage:74, tickets:3, base:3500,  csm:'Laura Sánchez' },
+  { name:'Vantage Analytics',       seg:'Mid-Market',  mrr:10500, lic:70,  nps:7.0, usage:67, tickets:4, base:3100,  csm:'Ana García'    },
+  { name:'RocketPath Co.',          seg:'Mid-Market',  mrr:15200, lic:98,  nps:7.7, usage:76, tickets:3, base:4400,  csm:'Pedro Martín'  },
+  { name:'SwiftLogic Apps',         seg:'Mid-Market',  mrr:9500,  lic:63,  nps:7.2, usage:70, tickets:4, base:2850, csm:'María López'   },
+  { name:'BridgeData Corp',         seg:'Mid-Market',  mrr:13500, lic:88,  nps:7.7, usage:76, tickets:2, base:3900,  csm:'Carlos Ruiz'   },
+  { name:'ClearVision Tech',        seg:'Mid-Market',  mrr:11500, lic:75,  nps:7.3, usage:72, tickets:3, base:3350, csm:'Laura Sánchez' },
+  { name:'DeepLogic Solutions',     seg:'Mid-Market',  mrr:16000, lic:102, nps:8.0, usage:79, tickets:2, base:4600,  csm:'Ana García'    },
+  { name:'EdgePoint Inc.',          seg:'Mid-Market',  mrr:8200,  lic:55,  nps:6.5, usage:58, tickets:7, base:2500,  csm:'Pedro Martín'  },
+  { name:'FuturePath Ltd',          seg:'Mid-Market',  mrr:14500, lic:93,  nps:7.8, usage:77, tickets:2, base:4200,  csm:'María López'   },
+  { name:'GroundWork Systems',      seg:'Mid-Market',  mrr:10800, lic:72,  nps:7.1, usage:70, tickets:4, base:3150, csm:'Carlos Ruiz'   },
+  { name:'HorizonData Co.',         seg:'Mid-Market',  mrr:17800, lic:115, nps:8.3, usage:83, tickets:1, base:5000,  csm:'Laura Sánchez' },
+  { name:'ImpactSoft Ltd',          seg:'Mid-Market',  mrr:9000,  lic:60,  nps:6.8, usage:64, tickets:5, base:2700,  csm:'Ana García'    },
+  { name:'JetStream Analytics',     seg:'Mid-Market',  mrr:12800, lic:83,  nps:7.6, usage:75, tickets:3, base:3700,  csm:'Pedro Martín'  },
+  { name:'KineticOps Corp',         seg:'Mid-Market',  mrr:11200, lic:74,  nps:7.2, usage:71, tickets:3, base:3300,  csm:'María López'   },
+  { name:'LightSpeed Software',     seg:'Mid-Market',  mrr:15500, lic:100, nps:7.9, usage:79, tickets:2, base:4450, csm:'Carlos Ruiz'   },
+  { name:'MasterData Inc.',         seg:'Mid-Market',  mrr:8600,  lic:57,  nps:6.6, usage:60, tickets:6, base:2650, csm:'Laura Sánchez' },
+  { name:'NodeLink Systems',        seg:'Mid-Market',  mrr:13200, lic:86,  nps:7.6, usage:75, tickets:3, base:3800,  csm:'Ana García'    },
+  { name:'OmniPath Corp',           seg:'Mid-Market',  mrr:16800, lic:108, nps:8.1, usage:81, tickets:2, base:4800,  csm:'Pedro Martín'  },
+  { name:'PeakSoft Solutions',      seg:'Mid-Market',  mrr:10000, lic:67,  nps:7.0, usage:67, tickets:4, base:3000,  csm:'María López'   },
+  { name:'QuickScale Ltd',          seg:'Mid-Market',  mrr:14000, lic:91,  nps:7.7, usage:77, tickets:2, base:4050, csm:'Carlos Ruiz'   },
+  { name:'ReachData Corp',          seg:'Mid-Market',  mrr:9300,  lic:62,  nps:6.9, usage:65, tickets:5, base:2820, csm:'Laura Sánchez' },
+  { name:'SkyBridge Analytics',     seg:'Mid-Market',  mrr:18200, lic:118, nps:8.2, usage:83, tickets:1, base:5100,  csm:'Ana García'    },
+  { name:'TurboLogic Inc.',         seg:'Mid-Market',  mrr:11000, lic:73,  nps:7.2, usage:71, tickets:3, base:3200,  csm:'Pedro Martín'  },
+  { name:'UltraPath Systems',       seg:'Mid-Market',  mrr:13800, lic:89,  nps:7.7, usage:76, tickets:2, base:4000,  csm:'María López'   },
+  { name:'ValueStream Ltd',         seg:'Mid-Market',  mrr:8900,  lic:59,  nps:6.7, usage:62, tickets:6, base:2750, csm:'Carlos Ruiz'   },
+  { name:'WaveForm Analytics',      seg:'Mid-Market',  mrr:15000, lic:97,  nps:7.8, usage:78, tickets:2, base:4350, csm:'Laura Sánchez' },
+  { name:'XcelData Corp',           seg:'Mid-Market',  mrr:10400, lic:69,  nps:7.0, usage:68, tickets:4, base:3050, csm:'Ana García'    },
+  { name:'YieldMetrics Inc.',       seg:'Mid-Market',  mrr:12200, lic:81,  nps:7.5, usage:74, tickets:3, base:3550, csm:'Pedro Martín'  },
+  { name:'ZenFlow Systems',         seg:'Mid-Market',  mrr:16200, lic:104, nps:8.0, usage:80, tickets:2, base:4650, csm:'María López'   },
+  { name:'ArcData Ltd',             seg:'Mid-Market',  mrr:9700,  lic:64,  nps:7.1, usage:69, tickets:4, base:2900,  csm:'Carlos Ruiz'   },
+  { name:'BoltSoft Solutions',      seg:'Mid-Market',  mrr:17000, lic:110, nps:8.1, usage:82, tickets:1, base:4850, csm:'Laura Sánchez' },
+  // SMB (35)
+  { name:'SmartOps Ltd',            seg:'SMB',         mrr:4200,  lic:28,  nps:5.5, usage:45, tickets:7, base:1400,  csm:'Laura Sánchez' },
+  { name:'NexusFlow Inc.',          seg:'SMB',         mrr:3800,  lic:25,  nps:5.2, usage:40, tickets:8, base:1300,  csm:'Pedro Martín'  },
+  { name:'MicroData Co.',           seg:'SMB',         mrr:5500,  lic:36,  nps:6.2, usage:58, tickets:4, base:1700,  csm:'Laura Sánchez' },
+  { name:'LocalCloud Ltd',          seg:'SMB',         mrr:2900,  lic:20,  nps:4.8, usage:35, tickets:9, base:1000,  csm:'Pedro Martín'  },
+  { name:'QuickStart Apps',         seg:'SMB',         mrr:6200,  lic:40,  nps:6.5, usage:62, tickets:3, base:1900,  csm:'Ana García'    },
+  { name:'BaseLayer Inc.',          seg:'SMB',         mrr:3500,  lic:24,  nps:5.0, usage:38, tickets:8, base:1200,  csm:'Laura Sánchez' },
+  { name:'TinyData Corp',           seg:'SMB',         mrr:4800,  lic:32,  nps:5.8, usage:52, tickets:5, base:1550, csm:'Pedro Martín'  },
+  { name:'StartupSync',             seg:'SMB',         mrr:7000,  lic:46,  nps:6.8, usage:66, tickets:3, base:2100,  csm:'María López'   },
+  { name:'SimpleSoft Ltd',          seg:'SMB',         mrr:3100,  lic:21,  nps:4.6, usage:33, tickets:10,base:1100,  csm:'Laura Sánchez' },
+  { name:'FastTrack Analytics',     seg:'SMB',         mrr:5800,  lic:38,  nps:6.3, usage:59, tickets:4, base:1800,  csm:'Pedro Martín'  },
+  { name:'OpenData Inc.',           seg:'SMB',         mrr:4500,  lic:30,  nps:5.6, usage:48, tickets:6, base:1450, csm:'Caroline Díaz' },
+  { name:'MiniCloud Corp',          seg:'SMB',         mrr:2700,  lic:18,  nps:4.4, usage:30, tickets:11,base:950,   csm:'Laura Sánchez' },
+  { name:'EasyMetrics Ltd',         seg:'SMB',         mrr:6500,  lic:43,  nps:6.6, usage:63, tickets:3, base:2000,  csm:'Pedro Martín'  },
+  { name:'DailySoft Inc.',          seg:'SMB',         mrr:3300,  lic:22,  nps:4.9, usage:36, tickets:9, base:1150, csm:'Caroline Díaz' },
+  { name:'BriefData Co.',           seg:'SMB',         mrr:5100,  lic:34,  nps:6.0, usage:55, tickets:5, base:1600,  csm:'Laura Sánchez' },
+  { name:'ProtoCloud Ltd',          seg:'SMB',         mrr:7500,  lic:49,  nps:7.0, usage:68, tickets:2, base:2250, csm:'Ana García'    },
+  { name:'SeedSync Inc.',           seg:'SMB',         mrr:3000,  lic:20,  nps:4.7, usage:34, tickets:10,base:1050, csm:'Pedro Martín'  },
+  { name:'NanoSoft Corp',           seg:'SMB',         mrr:4000,  lic:27,  nps:5.3, usage:43, tickets:7, base:1350, csm:'Caroline Díaz' },
+  { name:'LinkBase Ltd',            seg:'SMB',         mrr:6000,  lic:40,  nps:6.4, usage:61, tickets:4, base:1850, csm:'Laura Sánchez' },
+  { name:'DropData Inc.',           seg:'SMB',         mrr:3600,  lic:24,  nps:5.1, usage:39, tickets:8, base:1250, csm:'Pedro Martín'  },
+  { name:'ClearBase Analytics',     seg:'SMB',         mrr:5300,  lic:35,  nps:6.1, usage:57, tickets:5, base:1650, csm:'Ana García'    },
+  { name:'PopCloud Corp',           seg:'SMB',         mrr:2800,  lic:19,  nps:4.5, usage:32, tickets:10,base:1000, csm:'Caroline Díaz' },
+  { name:'FreshMetrics Ltd',        seg:'SMB',         mrr:6800,  lic:44,  nps:6.7, usage:64, tickets:3, base:2050, csm:'Laura Sánchez' },
+  { name:'GrowSoft Inc.',           seg:'SMB',         mrr:4100,  lic:28,  nps:5.4, usage:46, tickets:7, base:1400, csm:'Pedro Martín'  },
+  { name:'SwiftBase Corp',          seg:'SMB',         mrr:5600,  lic:37,  nps:6.2, usage:58, tickets:5, base:1750, csm:'Caroline Díaz' },
+  { name:'RapidData Ltd',           seg:'SMB',         mrr:3200,  lic:22,  nps:4.8, usage:35, tickets:9, base:1100, csm:'Ana García'    },
+  { name:'LeapCloud Inc.',          seg:'SMB',         mrr:7200,  lic:47,  nps:6.9, usage:67, tickets:2, base:2150, csm:'Laura Sánchez' },
+  { name:'QuickBase Systems',       seg:'SMB',         mrr:3700,  lic:25,  nps:5.2, usage:41, tickets:8, base:1300, csm:'Pedro Martín'  },
+  { name:'SlimSoft Corp',           seg:'SMB',         mrr:4700,  lic:31,  nps:5.7, usage:51, tickets:6, base:1500, csm:'Caroline Díaz' },
+  { name:'TurboBase Inc.',          seg:'SMB',         mrr:2600,  lic:18,  nps:4.3, usage:29, tickets:12,base:920,  csm:'Laura Sánchez' },
+  { name:'UpScale Analytics',       seg:'SMB',         mrr:6300,  lic:42,  nps:6.5, usage:62, tickets:3, base:1950, csm:'Ana García'    },
+  { name:'VaultData Ltd',           seg:'SMB',         mrr:3400,  lic:23,  nps:5.0, usage:37, tickets:9, base:1170, csm:'Pedro Martín'  },
+  { name:'WaveBase Corp',           seg:'SMB',         mrr:5000,  lic:33,  nps:5.9, usage:54, tickets:5, base:1580, csm:'Caroline Díaz' },
+  { name:'XpressData Inc.',         seg:'SMB',         mrr:4300,  lic:29,  nps:5.5, usage:47, tickets:7, base:1430, csm:'Laura Sánchez' },
+  { name:'ZeroFriction Ltd',        seg:'SMB',         mrr:7800,  lic:51,  nps:7.1, usage:70, tickets:2, base:2300, csm:'Ana García'    },
+];
+
+// ── GENERACIÓN DE DATOS ───────────────────────────────────────────────────────
+const YEARS    = [2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026];
+const QS       = ['Q1','Q2','Q3','Q4'];
+// Crecimiento acumulado del mercado: crisis covid 2020, recuperación fuerte 2021-2022
+const YR_GROWTH = [1.00, 1.18, 1.22, 1.15, 0.92, 1.25, 1.28, 1.18, 1.14, 1.12, 1.09];
+
+function rnd(seed) {
+  // Pseudo-random determinista basado en seed
+  const x = Math.sin(seed + 1) * 43758.5453;
+  return x - Math.floor(x);
+}
+
+function generate() {
+  const btn = document.getElementById('btn');
+  btn.disabled = true;
+  document.getElementById('progress').style.display = 'block';
+  document.getElementById('done').style.display = 'none';
+
+  setTimeout(() => {
+    try {
+      setProgress(5, 'Generando hoja Accounts...');
+      const accounts   = buildAccounts();
+      setProgress(30, 'Generando historial Period_Data (10 años × 4 trimestres)...');
+      const periodData = buildPeriodData();
+      setProgress(75, 'Generando respuestas NPS...');
+      const npsData    = buildNPSData();
+      setProgress(90, 'Construyendo Excel...');
+      buildExcel(accounts, periodData, npsData);
+      setProgress(100, 'Completado.');
+      document.getElementById('done').style.display = 'block';
+    } catch(e) {
+      alert('Error: ' + e.message);
+      console.error(e);
+    } finally {
+      btn.disabled = false;
+    }
+  }, 50);
+}
+
+function setProgress(pct, msg) {
+  document.getElementById('bar').style.width = pct + '%';
+  document.getElementById('log').textContent = msg;
+}
+
+function buildAccounts() {
+  return COMPANIES.map((c, i) => {
+    const id = 'ACC' + String(i + 1).padStart(3, '0');
+    // Fecha de renovación: distribuida a lo largo de 2026-2027
+    const renewMonth = ((i * 7 + 3) % 12) + 1;
+    const renewYear  = i % 3 === 0 ? 2026 : 2027;
+    const renewDate  = renewYear + '-' + String(renewMonth).padStart(2,'0') + '-01';
+    return {
+      Account_ID:                  id,
+      Account_Name:                c.name,
+      MRR_Current:                 c.mrr,
+      ARR_Current:                 c.mrr * 12,
+      Renewal_Date:                renewDate,
+      Total_Licenses:              c.lic,
+      Active_Users:                Math.round(c.lic * c.usage / 100),
+      Product_Usage_Percentage:    c.usage,
+      Open_Tickets:                c.tickets,
+      CSM_Name:                    c.csm,
+      Segment:                     c.seg,
+      Avg_Resolution_Time:         Math.round(8 + rnd(i * 31) * 40),
+      Last_Contact_Days:           Math.round(1 + rnd(i * 17) * 30),
+    };
+  });
+}
+
+function buildPeriodData() {
+  const rows = [];
+  COMPANIES.forEach((c, ai) => {
+    const id = 'ACC' + String(ai + 1).padStart(3, '0');
+    let cumGrowth = 1.0;
+
+    YEARS.forEach((year, yi) => {
+      if (yi > 0) cumGrowth *= YR_GROWTH[yi];
+
+      QS.forEach((q, qi) => {
+        const period  = year + '-' + q;
+        const seed    = ai * 1000 + yi * 40 + qi;
+
+        // Variación trimestral -4% a +5%
+        const qVar    = 1 + (rnd(seed) * 0.09 - 0.04);
+        const mrrStart = Math.max(100, Math.round(c.base * cumGrowth * qVar));
+
+        const expPct  = 0.025 + rnd(seed + 1) * 0.055;   // 2.5-8%
+        const conPct  = 0.008 + rnd(seed + 2) * 0.018;   // 0.8-2.6%
+        const churnPct= 0.003 + rnd(seed + 3) * 0.014;   // 0.3-1.7%
+
+        // Segmentos con más riesgo tienen mayor churn en SMB
+        const segFactor = c.seg === 'Enterprise' ? 0.7 : c.seg === 'Mid-Market' ? 1.0 : 1.5;
+
+        const expansion   = Math.round(mrrStart * expPct);
+        const contraction = Math.round(mrrStart * conPct * segFactor);
+        const churned     = Math.round(mrrStart * churnPct * segFactor);
+
+        const clientsBase    = c.seg === 'Enterprise' ? 8 + (ai % 5) : c.seg === 'Mid-Market' ? 4 + (ai % 4) : 2 + (ai % 3);
+        const clientsChurned = rnd(seed + 4) < (c.seg === 'SMB' ? 0.18 : c.seg === 'Mid-Market' ? 0.10 : 0.05) ? 1 : 0;
+        const clientsRenewed = clientsBase - (rnd(seed + 5) < 0.12 ? 1 : 0);
+
+        rows.push({
+          Account_ID:                   id,
+          Period:                       period,
+          MRR_Starting:                 mrrStart,
+          Expansion_Revenue:            expansion,
+          Contraction_Revenue:          contraction,
+          Churned_Revenue:              churned,
+          Clients_Start_Period:         clientsBase,
+          Clients_Churned:              clientsChurned,
+          Clients_Eligible_for_Renewal: clientsBase,
+          Clients_Renewed:              clientsRenewed,
+        });
+      });
+    });
+  });
+  return rows;
+}
+
+function buildNPSData() {
+  const rows = [];
+  COMPANIES.forEach((c, ai) => {
+    const id = 'ACC' + String(ai + 1).padStart(3, '0');
+    let cumGrowth = 1.0;
+
+    YEARS.forEach((year, yi) => {
+      if (yi > 0) cumGrowth *= YR_GROWTH[yi];
+
+      QS.forEach((q, qi) => {
+        const period = year + '-' + q;
+        const seed   = ai * 2000 + yi * 50 + qi;
+
+        // NPS mejora ligeramente con el tiempo (madurez producto) con variación
+        const npsBase = Math.min(10, c.nps + yi * 0.03);
+        const score1  = Math.max(0, Math.min(10, Math.round(npsBase + (rnd(seed)     * 4 - 2))));
+        const score2  = Math.max(0, Math.min(10, Math.round(npsBase + (rnd(seed + 7) * 4 - 2))));
+
+        rows.push({ Account_ID: id, Period: period, NPS_Response: score1 });
+        rows.push({ Account_ID: id, Period: period, NPS_Response: score2 });
+      });
+    });
+  });
+  return rows;
+}
+
+function buildExcel(accounts, periodData, npsData) {
+  const wb = XLSX.utils.book_new();
+
+  const wsA = XLSX.utils.json_to_sheet(accounts);
+  _autoWidth(wsA, accounts);
+  XLSX.utils.book_append_sheet(wb, wsA, 'Accounts');
+
+  const wsP = XLSX.utils.json_to_sheet(periodData);
+  _autoWidth(wsP, periodData.slice(0, 50));
+  XLSX.utils.book_append_sheet(wb, wsP, 'Period_Data');
+
+  const wsN = XLSX.utils.json_to_sheet(npsData);
+  _autoWidth(wsN, npsData.slice(0, 50));
+  XLSX.utils.book_append_sheet(wb, wsN, 'NPS_Data');
+
+  XLSX.writeFile(wb, 'CS_Analytics_100_cuentas.xlsx');
+}
+
+function _autoWidth(ws, data) {
+  if (!data.length) return;
+  const cols = Object.keys(data[0]);
+  ws['!cols'] = cols.map(k => {
+    const max = Math.max(k.length, ...data.map(r => String(r[k] ?? '').length));
+    return { wch: Math.min(max + 2, 30) };
+  });
+}
+</script>
+</body>
+</html>

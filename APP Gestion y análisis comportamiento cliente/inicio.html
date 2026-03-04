@@ -155,11 +155,11 @@
             letter-spacing: 2px;
             margin-bottom: 0.5rem;
         }
-        }
+
 
         .counter-value {
             font-size: 2.5rem;
-            font-weight: 900;
+            font-weight: 700;
             color: white;
             display: flex;
             align-items: center;
@@ -945,6 +945,7 @@
         </p>
     </div>
 
+    <script src="visit-tracker.js"></script>
     <script>
         // Generate animated particles
         const particlesContainer = document.getElementById('particles');
@@ -958,36 +959,6 @@
             particle.style.animationDelay = Math.random() * 5 + 's';
             particlesContainer.appendChild(particle);
         }
-
-        // Contador de visitas
-        (function() {
-            const COUNTER_KEY = 'cs_analytics_visit_count';
-            const START_COUNT = 1100;
-            
-            // Obtener contador actual o inicializar
-            let visitCount = localStorage.getItem(COUNTER_KEY);
-            
-            if (!visitCount) {
-                visitCount = START_COUNT;
-            } else {
-                visitCount = parseInt(visitCount);
-            }
-            
-            // Incrementar el contador
-            visitCount++;
-            
-            // Guardar en localStorage
-            localStorage.setItem(COUNTER_KEY, visitCount);
-            
-            // Formatear número con separador de miles
-            const formattedCount = visitCount.toLocaleString('es-ES');
-            
-            // Actualizar el DOM
-            const counterElement = document.getElementById('visitCount');
-            if (counterElement) {
-                counterElement.textContent = formattedCount;
-            }
-        })();
 
         document.querySelector('.cta-button').addEventListener('click', function(e) {
             console.log('User clicked Start Analysis button');

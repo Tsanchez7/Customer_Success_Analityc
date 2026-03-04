@@ -1,6 +1,12 @@
 // ===== SISTEMA DE AYUDA Y TOOLTIPS =====
 
 function initHelpSystem() {
+    // Evitar duplicar listeners en reinicializaciones
+    if (window.__csHelpInitialized) {
+        initDynamicTooltips();
+        return;
+    }
+
     // Crear el panel de ayuda si no existe
     if (!document.getElementById('helpPanel')) {
         createHelpPanel();
@@ -26,6 +32,8 @@ function initHelpSystem() {
     
     // Inicializar tooltips dinámicos
     initDynamicTooltips();
+
+    window.__csHelpInitialized = true;
 }
 
 // ===== TOOLTIPS DINÁMICOS =====
