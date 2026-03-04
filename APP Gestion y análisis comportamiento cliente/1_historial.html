@@ -11,10 +11,131 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Historial 10 Años - Dashboard de Cuentas</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="alternate icon" href="favicon.svg">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="navigation.css">
     <link rel="stylesheet" href="help-system.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <style>
+    /* ===== CUENTAS ANCLA ===== */
+    .anchor-section {
+        background: #fff;
+        border-radius: 14px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        padding: 1.75rem 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .anchor-section > h2 { margin: 0 0 0.3rem; }
+    .anchor-section > .anchor-subtitle { color: #6b7280; font-size: 0.88rem; margin: 0 0 1.5rem; }
+    .anchor-kpi-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 0.85rem;
+        margin-bottom: 1.75rem;
+    }
+    .anchor-kpi {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        border: 1px solid #bae6fd;
+        border-radius: 10px;
+        padding: 0.9rem 1rem;
+        text-align: center;
+    }
+    .anchor-kpi.gold   { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border-color: #fcd34d; }
+    .anchor-kpi.green  { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-color: #86efac; }
+    .anchor-kpi.purple { background: linear-gradient(135deg, #faf5ff 0%, #ede9fe 100%); border-color: #c4b5fd; }
+    .anchor-kpi-val  { font-size: 1.5rem; font-weight: 800; color: #1e40af; line-height: 1.2; }
+    .anchor-kpi.gold   .anchor-kpi-val { color: #92400e; }
+    .anchor-kpi.green  .anchor-kpi-val { color: #166534; }
+    .anchor-kpi.purple .anchor-kpi-val { color: #5b21b6; }
+    .anchor-kpi-lbl  { font-size: 0.77rem; color: #475569; font-weight: 500; margin-top: 0.15rem; }
+
+    .anchor-categories { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; margin-bottom: 1.75rem; }
+    .anchor-cat-card {
+        border-radius: 10px;
+        border: 1px solid #e5e7eb;
+        overflow: hidden;
+    }
+    .anchor-cat-header {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        padding: 0.7rem 1rem;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+    .anchor-cat-header.mrr    { background: linear-gradient(90deg, #1e40af, #3b82f6); color: #fff; }
+    .anchor-cat-header.loyal  { background: linear-gradient(90deg, #065f46, #10b981); color: #fff; }
+    .anchor-cat-header.nps    { background: linear-gradient(90deg, #78350f, #f59e0b); color: #fff; }
+    .anchor-cat-header.growth { background: linear-gradient(90deg, #4c1d95, #8b5cf6); color: #fff; }
+    .anchor-cat-list { padding: 0.4rem 0; }
+    .anchor-cat-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.45rem 1rem;
+        border-bottom: 1px solid #f3f4f6;
+        font-size: 0.83rem;
+        transition: background 0.15s;
+    }
+    .anchor-cat-item:last-child { border-bottom: none; }
+    .anchor-cat-item:hover { background: #f9fafb; }
+    .anchor-cat-rank {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.4rem;
+        height: 1.4rem;
+        border-radius: 50%;
+        font-size: 0.72rem;
+        font-weight: 700;
+        flex-shrink: 0;
+        margin-right: 0.45rem;
+    }
+    .rank-1 { background: #fef3c7; color: #92400e; }
+    .rank-2 { background: #f1f5f9; color: #334155; }
+    .rank-3 { background: #fef9ee; color: #78350f; }
+    .rank-n { background: #f1f5f9; color: #6b7280; }
+    .anchor-cat-name { font-weight: 600; color: #1f2937; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
+    .anchor-cat-val  { font-weight: 700; color: #3b82f6; white-space: nowrap; font-size: 0.82rem; }
+    .anchor-cat-sub  { font-size: 0.72rem; color: #6b7280; }
+
+    .anchor-table-wrap { overflow-x: auto; margin-top: 0.25rem; }
+    .anchor-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.82rem;
+    }
+    .anchor-table th {
+        background: #f8fafc;
+        padding: 0.5rem 0.7rem;
+        text-align: left;
+        font-weight: 600;
+        color: #475569;
+        border-bottom: 2px solid #e2e8f0;
+        white-space: nowrap;
+    }
+    .anchor-table td {
+        padding: 0.55rem 0.7rem;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+    }
+    .anchor-table tr:hover td { background: #f8fafc; }
+    .anchor-stability-bar { display: flex; align-items: center; gap: 0.4rem; }
+    .anchor-stability-track { flex: 1; height: 7px; background: #e2e8f0; border-radius: 4px; overflow: hidden; min-width: 60px; }
+    .anchor-stability-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #3b82f6, #10b981); }
+    .anchor-badge {
+        display: inline-block;
+        padding: 0.15rem 0.45rem;
+        border-radius: 5px;
+        font-size: 0.72rem;
+        font-weight: 600;
+    }
+    .anchor-badge.elite   { background: #fef3c7; color: #92400e; }
+    .anchor-badge.senior  { background: #dcfce7; color: #166534; }
+    .anchor-badge.growing { background: #ede9fe; color: #5b21b6; }
+    .anchor-badge.new     { background: #f0f9ff; color: #1e40af; }
+    </style>
 </head>
 <body>
     <!-- Google Tag Manager (noscript) -->
@@ -279,6 +400,41 @@
             </div>
         </section>
 
+        <!-- CUENTAS ANCLA -->
+        <section class="anchor-section" id="anchorSection">
+            <h2>🏛️ Cuentas Ancla — Motor Financiero de la Empresa</h2>
+            <p class="anchor-subtitle">Las cuentas que sostienen, estabilizan y hacen crecer el negocio a lo largo del tiempo</p>
+            <div class="anchor-kpi-row" id="anchorKpiRow">
+                <div class="anchor-kpi"><div class="anchor-kpi-val" id="anchorTotalAccounts">—</div><div class="anchor-kpi-lbl">Cuentas analizadas</div></div>
+                <div class="anchor-kpi gold"><div class="anchor-kpi-val" id="anchorTopMRR">—</div><div class="anchor-kpi-lbl">MRR histórico total (top cuenta)</div></div>
+                <div class="anchor-kpi green"><div class="anchor-kpi-val" id="anchorMaxLongevity">—</div><div class="anchor-kpi-lbl">Años de permanencia máxima</div></div>
+                <div class="anchor-kpi purple"><div class="anchor-kpi-val" id="anchorEliteCount">—</div><div class="anchor-kpi-lbl">Cuentas élite (estabilidad &gt;80)</div></div>
+            </div>
+            <div class="anchor-categories" id="anchorCategories"></div>
+            <h3 style="margin:0 0 0.75rem;font-size:0.95rem;color:#374151;">📊 Ranking Global — Índice de Estabilidad &amp; Valor</h3>
+            <div class="anchor-table-wrap">
+                <table class="anchor-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Cuenta</th>
+                            <th>Segmento</th>
+                            <th>MRR Actual</th>
+                            <th>MRR Acumulado (histórico)</th>
+                            <th>Años activa</th>
+                            <th>NPS medio</th>
+                            <th>NRR contribuido</th>
+                            <th>Estabilidad</th>
+                            <th>Categoría</th>
+                        </tr>
+                    </thead>
+                    <tbody id="anchorTableBody">
+                        <tr><td colspan="10" style="text-align:center;color:#9ca3af;padding:1.5rem;">📂 Carga un archivo Excel para ver el análisis de cuentas ancla</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
         <!-- HITOS HISTÓRICOS -->
         <section class="milestones-section">
             <h2>🏆 Hitos Destacados</h2>
@@ -308,8 +464,206 @@
     <script src="demo-data.js"></script>
     <script src="script_historial.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>if(typeof window.jspdf==='undefined'&&typeof window.jsPDF==='undefined'){var s=document.createElement('script');s.src='https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js';document.head.appendChild(s);}</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <script src="pdf-export.js"></script>
+    <script>
+    /* ===== CUENTAS ANCLA ===== */
+    var AccountAnchor = {
+
+        init: function() {
+            var accounts   = (typeof excelData !== 'undefined' && excelData.accounts)   ? excelData.accounts   : [];
+            var periodData = (typeof excelData !== 'undefined' && excelData.periodData) ? excelData.periodData : [];
+            var npsAll     = (typeof excelData !== 'undefined' && excelData.npsData)    ? excelData.npsData    : [];
+            if (accounts.length === 0) return;
+
+            var totalYears = this._totalYears(periodData);
+            var profiles   = this._buildProfiles(accounts, periodData, npsAll, totalYears);
+
+            this._renderKPIs(profiles, totalYears);
+            this._renderCategories(profiles);
+            this._renderTable(profiles);
+        },
+
+        _totalYears: function(periodData) {
+            var years = {};
+            periodData.forEach(function(r) { if (r.Period) years[r.Period.split('-')[0]] = 1; });
+            return Object.keys(years).length || 1;
+        },
+
+        _buildProfiles: function(accounts, periodData, npsAll, totalYears) {
+            var self = this;
+            return accounts.map(function(acc) {
+                var id   = String(acc.Account_ID);
+                var pd   = periodData.filter(function(r) { return String(r.Account_ID) === id; });
+                var np   = npsAll.filter(function(n)    { return String(n.Account_ID) === id; });
+
+                // MRR acumulado histórico
+                var mrrAcc = pd.reduce(function(s, r) { return s + (parseFloat(r.MRR_Starting) || 0); }, 0);
+
+                // Expansión neta acumulada
+                var expansion  = pd.reduce(function(s, r) { return s + (parseFloat(r.Expansion_Revenue) || 0); }, 0);
+                var contraction= pd.reduce(function(s, r) { return s + (parseFloat(r.Contraction_Revenue) || 0); }, 0);
+                var churnRev   = pd.reduce(function(s, r) { return s + (parseFloat(r.Churned_Revenue) || 0); }, 0);
+                var nrr = mrrAcc > 0 ? ((mrrAcc + expansion - contraction - churnRev) / mrrAcc) * 100 : 100;
+
+                // Años activa
+                var yearsMap = {};
+                pd.forEach(function(r) { if (r.Period) yearsMap[r.Period.split('-')[0]] = 1; });
+                var yearsActive = Object.keys(yearsMap).length;
+
+                // NPS medio
+                var avgNPS = 0;
+                if (np.length > 0) avgNPS = np.reduce(function(s, n) { return s + (parseInt(n.NPS_Response) || 0); }, 0) / np.length;
+
+                // Índice estabilidad: mix ponderado
+                var longevityScore = (yearsActive / totalYears) * 100;
+                var npsScore       = (avgNPS / 10) * 100;
+                var nrrScore       = Math.min(nrr, 130);
+                var mrrNorm        = 0; // se normaliza en _renderTable
+                var stability      = longevityScore * 0.4 + npsScore * 0.2 + Math.min(nrrScore, 100) * 0.2 + 20; // base 20
+                stability          = Math.min(Math.round(stability), 100);
+
+                return {
+                    id:           id,
+                    name:         acc.Account_Name || id,
+                    segment:      acc.Segment || acc.Type || '—',
+                    csm:          acc.CSM_Name || '—',
+                    mrrCurrent:   parseFloat(acc.MRR_Current) || 0,
+                    mrrAcc:       Math.round(mrrAcc),
+                    expansion:    Math.round(expansion),
+                    yearsActive:  yearsActive,
+                    avgNPS:       Math.round(avgNPS * 10) / 10,
+                    nrr:          Math.round(nrr * 10) / 10,
+                    stability:    stability
+                };
+            });
+        },
+
+        _renderKPIs: function(profiles, totalYears) {
+            var byMRR  = profiles.slice().sort(function(a, b) { return b.mrrAcc - a.mrrAcc; });
+            var topMRR = byMRR[0] ? byMRR[0].mrrAcc : 0;
+            var elites = profiles.filter(function(p) { return p.stability >= 80; }).length;
+            var maxYrs = Math.max.apply(null, profiles.map(function(p) { return p.yearsActive; })) || 0;
+            var fmt    = function(v) { return v >= 1000000 ? '$' + (v/1000000).toFixed(1) + 'M' : v >= 1000 ? '$' + Math.round(v/1000) + 'K' : '$' + v; };
+
+            var e = function(id) { return document.getElementById(id); };
+            if (e('anchorTotalAccounts')) e('anchorTotalAccounts').textContent = profiles.length;
+            if (e('anchorTopMRR'))        e('anchorTopMRR').textContent        = fmt(topMRR);
+            if (e('anchorMaxLongevity'))  e('anchorMaxLongevity').textContent  = maxYrs + ' años';
+            if (e('anchorEliteCount'))    e('anchorEliteCount').textContent    = elites;
+        },
+
+        _renderCategories: function(profiles) {
+            var container = document.getElementById('anchorCategories');
+            if (!container) return;
+
+            var byMRR      = profiles.slice().sort(function(a, b) { return b.mrrAcc - a.mrrAcc; }).slice(0, 5);
+            var byLoyal    = profiles.slice().sort(function(a, b) { return b.yearsActive - a.yearsActive || b.mrrCurrent - a.mrrCurrent; }).slice(0, 5);
+            var byNPS      = profiles.slice().sort(function(a, b) { return b.avgNPS - a.avgNPS; }).slice(0, 5);
+            var byGrowth   = profiles.slice().sort(function(a, b) { return b.expansion - a.expansion; }).slice(0, 5);
+
+            var fmt    = function(v) { return v >= 1000000 ? '$' + (v/1000000).toFixed(1) + 'M' : v >= 1000 ? '$' + Math.round(v/1000) + 'K' : '$' + v; };
+            var rCls   = function(i) { return i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-n'; };
+            var rLabel = function(i) { return i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i+1); };
+
+            var cats = [
+                {
+                    id: 'mrr', header: 'mrr', icon: '💰', title: 'Top MRR Acumulado', list: byMRR,
+                    val: function(p) { return fmt(p.mrrAcc); },
+                    sub: function(p) { return 'Actual: ' + fmt(p.mrrCurrent); }
+                },
+                {
+                    id: 'loyal', header: 'loyal', icon: '🏛️', title: 'Mayor Longevidad', list: byLoyal,
+                    val: function(p) { return p.yearsActive + ' años'; },
+                    sub: function(p) { return fmt(p.mrrCurrent) + '/mes'; }
+                },
+                {
+                    id: 'nps', header: 'nps', icon: '⭐', title: 'NPS Champions', list: byNPS,
+                    val: function(p) { return 'NPS ' + p.avgNPS.toFixed(1); },
+                    sub: function(p) { return fmt(p.mrrCurrent) + ' MRR'; }
+                },
+                {
+                    id: 'growth', header: 'growth', icon: '📈', title: 'Motor de Expansión', list: byGrowth,
+                    val: function(p) { return '+' + fmt(p.expansion); },
+                    sub: function(p) { return 'NRR ' + p.nrr.toFixed(0) + '%'; }
+                }
+            ];
+
+            container.innerHTML = cats.map(function(cat) {
+                var items = cat.list.map(function(p, i) {
+                    return '<div class="anchor-cat-item">' +
+                        '<span class="anchor-cat-rank ' + rCls(i) + '">' + rLabel(i) + '</span>' +
+                        '<span class="anchor-cat-name" title="' + p.name + '">' + p.name + '</span>' +
+                        '<span style="margin-left:auto;text-align:right">' +
+                            '<div class="anchor-cat-val">' + cat.val(p) + '</div>' +
+                            '<div class="anchor-cat-sub">' + cat.sub(p) + '</div>' +
+                        '</span>' +
+                    '</div>';
+                }).join('');
+                return '<div class="anchor-cat-card">' +
+                    '<div class="anchor-cat-header ' + cat.header + '">' + cat.icon + ' ' + cat.title + '</div>' +
+                    '<div class="anchor-cat-list">' + items + '</div>' +
+                '</div>';
+            }).join('');
+        },
+
+        _renderTable: function(profiles) {
+            var tbody = document.getElementById('anchorTableBody');
+            if (!tbody) return;
+
+            // Normalizar MRR acumulado para calcular estabilidad final con peso de ingresos
+            var maxMRR = Math.max.apply(null, profiles.map(function(p) { return p.mrrAcc; })) || 1;
+            var ranked = profiles.map(function(p) {
+                var mrrNormScore = (p.mrrAcc / maxMRR) * 100;
+                // Recalcular stability incluyendo peso de MRR
+                var s = p.stability * 0.6 + mrrNormScore * 0.4;
+                return Object.assign({}, p, { finalScore: Math.min(Math.round(s), 100) });
+            }).sort(function(a, b) { return b.finalScore - a.finalScore; });
+
+            var fmt    = function(v) { return v >= 1000000 ? '$' + (v/1000000).toFixed(1) + 'M' : v >= 1000 ? '$' + Math.round(v/1000) + 'K' : '$' + v; };
+            var cat    = function(p) {
+                if (p.finalScore >= 80) return '<span class="anchor-badge elite">🌟 Élite</span>';
+                if (p.finalScore >= 65) return '<span class="anchor-badge senior">💚 Senior</span>';
+                if (p.yearsActive >= 5) return '<span class="anchor-badge growing">📈 Creciente</span>';
+                return '<span class="anchor-badge new">🔵 En desarrollo</span>';
+            };
+            var nrrColor = function(v) { return v >= 110 ? '#10b981' : v >= 100 ? '#34d399' : v >= 90 ? '#f59e0b' : '#ef4444'; };
+            var npsColor = function(v) { return v >= 8 ? '#10b981' : v >= 6 ? '#f59e0b' : '#ef4444'; };
+
+            tbody.innerHTML = ranked.map(function(p, i) {
+                var medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
+                return '<tr>' +
+                    '<td style="font-weight:700;text-align:center;font-size:1.05rem;">' + medal + '</td>' +
+                    '<td><strong title="CSM: ' + p.csm + '">' + p.name + '</strong>' +
+                        '<div style="font-size:0.72rem;color:#6b7280;">CSM: ' + p.csm + '</div></td>' +
+                    '<td><span style="font-size:0.8rem;color:#475569;">' + p.segment + '</span></td>' +
+                    '<td style="font-weight:600;color:#3b82f6;">' + fmt(p.mrrCurrent) + '</td>' +
+                    '<td style="font-weight:700;color:#1e40af;">' + fmt(p.mrrAcc) + '</td>' +
+                    '<td style="text-align:center;font-weight:600;">' + p.yearsActive + ' <span style="color:#9ca3af;font-weight:400;font-size:0.78rem;">años</span></td>' +
+                    '<td style="color:' + npsColor(p.avgNPS) + ';font-weight:700;text-align:center;">' + p.avgNPS.toFixed(1) + '</td>' +
+                    '<td style="color:' + nrrColor(p.nrr) + ';font-weight:700;">' + p.nrr.toFixed(0) + '%</td>' +
+                    '<td><div class="anchor-stability-bar">' +
+                        '<div class="anchor-stability-track"><div class="anchor-stability-fill" style="width:' + p.finalScore + '%"></div></div>' +
+                        '<span style="font-weight:700;font-size:0.85rem;min-width:2rem;">' + p.finalScore + '</span>' +
+                    '</div></td>' +
+                    '<td>' + cat(p) + '</td>' +
+                '</tr>';
+            }).join('');
+        }
+    };
+
+    // Hook en renderHistoricalDashboard
+    (function() {
+        var orig = window.renderHistoricalDashboard;
+        if (typeof orig === 'function') {
+            window.renderHistoricalDashboard = function() {
+                orig.apply(this, arguments);
+                AccountAnchor.init();
+            };
+        }
+    })();
+    </script>
     </div>
 </body>
 </html>

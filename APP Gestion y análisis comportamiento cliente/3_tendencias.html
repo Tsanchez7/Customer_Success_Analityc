@@ -11,10 +11,117 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tendencias y Previsión - Dashboard de Cuentas</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="alternate icon" href="favicon.svg">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="navigation.css">
     <link rel="stylesheet" href="help-system.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <style>
+    /* ===== PLAN DE ACTUACIÓN ===== */
+    .action-plan-section {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .action-plan-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1.25rem;
+    }
+    .action-plan-summary {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+    .ap-summary-badge {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0.55rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.8rem;
+        min-width: 90px;
+        text-align: center;
+    }
+    .ap-summary-badge.critical { background: #fee2e2; color: #991b1b; }
+    .ap-summary-badge.at-risk  { background: #ffedd5; color: #9a3412; }
+    .ap-summary-badge.revenue  { background: #fef3c7; color: #92400e; }
+    .ap-summary-badge .ap-badge-num { font-size: 1.35rem; font-weight: 700; line-height: 1.2; }
+    .ap-filters {
+        display: flex;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+        margin-bottom: 0.75rem;
+    }
+    .ap-filter-btn {
+        padding: 0.3rem 0.85rem;
+        border: 1px solid #d1d5db;
+        background: #f9fafb;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.82rem;
+        font-weight: 500;
+        transition: all 0.2s;
+        color: #374151;
+    }
+    .ap-filter-btn:hover { background: #e0e7ff; border-color: #6366f1; color: #4338ca; }
+    .ap-filter-btn.active { background: #1e40af; color: #fff; border-color: #1e40af; }
+    .ap-table-wrapper { overflow-x: auto; }
+    .ap-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.84rem;
+    }
+    .ap-table th {
+        background: #f1f5f9;
+        padding: 0.55rem 0.7rem;
+        text-align: left;
+        font-weight: 600;
+        color: #475569;
+        border-bottom: 2px solid #e2e8f0;
+        white-space: nowrap;
+    }
+    .ap-table td {
+        padding: 0.6rem 0.7rem;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+    }
+    .ap-table tr:hover td { background: #f8fafc; }
+    .ap-health-bar { display: flex; align-items: center; gap: 0.45rem; }
+    .ap-health-track {
+        flex: 1;
+        height: 6px;
+        background: #e2e8f0;
+        border-radius: 3px;
+        overflow: hidden;
+        min-width: 55px;
+    }
+    .ap-health-fill { height: 100%; border-radius: 3px; }
+    .ap-health-fill.critical { background: #ef4444; }
+    .ap-health-fill.at-risk  { background: #f97316; }
+    .ap-health-fill.good     { background: #eab308; }
+    .ap-actions-list { display: flex; flex-direction: column; gap: 0.2rem; }
+    .ap-action-item { font-size: 0.77rem; color: #374151; }
+    .ap-priority-badge {
+        display: inline-block;
+        padding: 0.18rem 0.5rem;
+        border-radius: 5px;
+        font-size: 0.74rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    .ap-priority-badge.urgent { background: #fee2e2; color: #991b1b; }
+    .ap-priority-badge.high   { background: #ffedd5; color: #9a3412; }
+    .ap-priority-badge.medium { background: #fef9c3; color: #713f12; }
+    .ap-empty { text-align: center; padding: 2rem; color: #6b7280; font-style: italic; }
+    </style>
 </head>
 <body>
     <!-- Google Tag Manager (noscript) -->
@@ -294,6 +401,52 @@
             </div>
         </section>
 
+        <!-- PLAN DE ACTUACIÓN -->
+        <section class="action-plan-section">
+            <div class="action-plan-header">
+                <div>
+                    <h2 style="margin:0 0 0.25rem;">🚨 Plan de Actuación — Cuentas en Riesgo</h2>
+                    <p style="margin:0;color:#6b7280;font-size:0.88rem;">Acciones recomendadas para cuentas con Health Score &lt; 60</p>
+                </div>
+                <div class="action-plan-summary">
+                    <div class="ap-summary-badge critical">
+                        <span class="ap-badge-num" id="apCountCritical">0</span>
+                        <span>Críticas</span>
+                    </div>
+                    <div class="ap-summary-badge at-risk">
+                        <span class="ap-badge-num" id="apCountAtRisk">0</span>
+                        <span>En Riesgo</span>
+                    </div>
+                    <div class="ap-summary-badge revenue">
+                        <span class="ap-badge-num" id="apMrrAtRisk">$0</span>
+                        <span>MRR en Riesgo</span>
+                    </div>
+                </div>
+            </div>
+            <div class="ap-filters">
+                <button class="ap-filter-btn active" onclick="ActionPlan.filter('all',this)">🔍 Todas</button>
+                <button class="ap-filter-btn" onclick="ActionPlan.filter('critical',this)">🔴 Críticas (&lt;40)</button>
+                <button class="ap-filter-btn" onclick="ActionPlan.filter('at-risk',this)">🟠 En Riesgo (40–59)</button>
+            </div>
+            <div class="ap-table-wrapper">
+                <table class="ap-table">
+                    <thead>
+                        <tr>
+                            <th>Cuenta</th>
+                            <th>Health Score</th>
+                            <th>MRR</th>
+                            <th>Factores de Riesgo</th>
+                            <th>Acciones Recomendadas</th>
+                            <th>Prioridad</th>
+                        </tr>
+                    </thead>
+                    <tbody id="apTableBody">
+                        <tr><td colspan="6" class="ap-empty">📂 Carga un archivo Excel para generar el plan de actuación</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
         <!-- ESCENARIOS -->
         <section class="scenarios-section">
             <h2>🎲 Escenarios de Proyección</h2>
@@ -404,8 +557,183 @@
     <script src="demo-data.js"></script>
     <script src="script_tendencias.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>if(typeof window.jspdf==='undefined'&&typeof window.jsPDF==='undefined'){var s=document.createElement('script');s.src='https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js';document.head.appendChild(s);}</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <script src="pdf-export.js"></script>
+    <script>
+    /* ===== PLAN DE ACTUACIÓN ===== */
+    var ActionPlan = {
+        _data: [],
+        _filter: 'all',
+
+        /* Calcula health score desde datos brutos (igual que script_actualidad.js) */
+        _calcHS: function(acc, npsArr) {
+            var usage    = (parseFloat(acc.Product_Usage_Percentage) || 0) / 100;
+            var adoption = (parseFloat(acc.Active_Users) || 0) / (parseFloat(acc.Total_Licenses) || 1);
+            var tickets  = Math.max(0, 1 - (parseInt(acc.Open_Tickets) || 0) * 0.05);
+            var npsScore = 0.5, avgNPS = 0;
+            if (npsArr && npsArr.length > 0) {
+                avgNPS   = npsArr.reduce(function(s, n) { return s + (parseInt(n.NPS_Response) || 0); }, 0) / npsArr.length;
+                npsScore = avgNPS / 10;
+            }
+            return {
+                score:       Math.round((usage * 0.3 + adoption * 0.25 + tickets * 0.25 + npsScore * 0.2) * 100),
+                avgNPS:      Math.round(avgNPS),
+                adoptionRate: Math.round(adoption * 100)
+            };
+        },
+
+        init: function() {
+            /* excelData está definido en script_tendencias.js — siempre disponible aquí */
+            var accounts = (typeof excelData !== 'undefined' && excelData.accounts) ? excelData.accounts : [];
+            var npsAll   = (typeof excelData !== 'undefined' && excelData.npsData)  ? excelData.npsData  : [];
+            if (accounts.length === 0) return;
+
+            var self = this;
+            this._data = [];
+
+            accounts.forEach(function(acc) {
+                var accNPS = npsAll.filter(function(n) { return String(n.Account_ID) === String(acc.Account_ID); });
+                var hs     = self._calcHS(acc, accNPS);
+                if (hs.score < 60) {
+                    self._data.push({
+                        Account_ID:               acc.Account_ID,
+                        Account_Name:             acc.Account_Name,
+                        CSM_Name:                 acc.CSM_Name,
+                        MRR_Current:              acc.MRR_Current,
+                        Product_Usage_Percentage: acc.Product_Usage_Percentage,
+                        Open_Tickets:             acc.Open_Tickets,
+                        Total_Licenses:           acc.Total_Licenses,
+                        Active_Users:             acc.Active_Users,
+                        healthScore:              hs.score,
+                        nps:                      hs.avgNPS,
+                        adoptionRate:             hs.adoptionRate
+                    });
+                }
+            });
+
+            this._data.sort(function(a, b) { return a.healthScore - b.healthScore; });
+
+            var critical = this._data.filter(function(a) { return a.healthScore < 40; });
+            var atRisk   = this._data.filter(function(a) { return a.healthScore >= 40 && a.healthScore < 60; });
+            var mrrSum   = this._data.reduce(function(s, a) { return s + (parseFloat(a.MRR_Current) || 0); }, 0);
+
+            var el  = function(id) { return document.getElementById(id); };
+            var fmt = function(v)  { return '$' + Math.round(v).toLocaleString('es-ES'); };
+
+            if (el('apCountCritical')) el('apCountCritical').textContent = critical.length;
+            if (el('apCountAtRisk'))   el('apCountAtRisk').textContent   = atRisk.length;
+            if (el('apMrrAtRisk'))     el('apMrrAtRisk').textContent     = fmt(mrrSum);
+
+            this.render();
+        },
+
+        _factors: function(acc) {
+            var f = [];
+            var hs       = acc.healthScore || 0;
+            var usage    = parseFloat(acc.Product_Usage_Percentage) || 0;
+            var tickets  = parseInt(acc.Open_Tickets) || 0;
+            var nps      = parseFloat(acc.nps) || 0;
+            var adoption = parseFloat(acc.adoptionRate) || 0;
+            if (hs < 40)       f.push('Health Score crítico (' + hs.toFixed(0) + ')');
+            if (usage < 40)    f.push('Uso bajo del producto (' + usage.toFixed(0) + '%)');
+            if (tickets > 5)   f.push('Alto volumen de tickets (' + tickets + ')');
+            if (nps < 0)       f.push('NPS negativo (' + nps.toFixed(0) + ')');
+            if (adoption < 40) f.push('Baja adopción (' + adoption.toFixed(0) + '%)');
+            if (f.length === 0) f.push('Revisión preventiva recomendada');
+            return f;
+        },
+
+        _actions: function(acc) {
+            var a = [];
+            var hs       = acc.healthScore || 0;
+            var usage    = parseFloat(acc.Product_Usage_Percentage) || 0;
+            var tickets  = parseInt(acc.Open_Tickets) || 0;
+            var nps      = parseFloat(acc.nps) || 0;
+            var adoption = parseFloat(acc.adoptionRate) || 0;
+            var mrr      = parseFloat(acc.MRR_Current) || 0;
+            if (hs < 40)               a.push('📞 Llamada ejecutiva urgente (72h)');
+            else                       a.push('📧 Seguimiento proactivo por email');
+            if (usage < 40 || adoption < 40) a.push('🎓 Sesión de formación y onboarding');
+            if (tickets > 5)           a.push('🔧 Revisión y cierre de tickets pendientes');
+            if (nps < 0)               a.push('💬 Entrevista de satisfacción 1:1');
+            if (hs < 60 && mrr > 3000) a.push('💰 Revisión de contrato y propuesta de valor');
+            if (a.length === 0)        a.push('📊 Revisión trimestral programada');
+            return a.slice(0, 3);
+        },
+
+        _priority: function(acc) {
+            var hs  = acc.healthScore || 0;
+            var mrr = parseFloat(acc.MRR_Current) || 0;
+            if (hs < 40 || (hs < 50 && mrr > 5000)) return { label: '🔴 Urgente', cls: 'urgent' };
+            if (hs < 50 || mrr > 3000)              return { label: '🟠 Alta',    cls: 'high'   };
+            return                                         { label: '🟡 Media',   cls: 'medium' };
+        },
+
+        render: function() {
+            var tbody = document.getElementById('apTableBody');
+            if (!tbody) return;
+
+            var self = this;
+            var list = this._filter === 'all'      ? this._data :
+                       this._filter === 'critical' ? this._data.filter(function(a) { return (a.healthScore||0) < 40; }) :
+                       this._data.filter(function(a) { var hs = a.healthScore||0; return hs >= 40 && hs < 60; });
+
+            if (list.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="ap-empty">' +
+                    (this._filter === 'all'
+                        ? '✅ No hay cuentas en riesgo. Carga datos para ver el análisis.'
+                        : '✅ No hay cuentas en esta categoría') +
+                    '</td></tr>';
+                return;
+            }
+
+            var fmt = function(v) { return '$' + Math.round(v).toLocaleString('es-ES'); };
+
+            tbody.innerHTML = list.map(function(acc) {
+                var hs       = acc.healthScore || 0;
+                var cls      = hs < 40 ? 'critical' : hs < 60 ? 'at-risk' : 'good';
+                var color    = cls === 'critical' ? '#ef4444' : cls === 'at-risk' ? '#f97316' : '#eab308';
+                var factors  = self._factors(acc);
+                var actions  = self._actions(acc);
+                var priority = self._priority(acc);
+                var mrr      = parseFloat(acc.MRR_Current) || 0;
+                var name     = acc.Account_Name || acc.Account_ID || '-';
+                var csm      = acc.CSM_Name ? '<br><span style="font-size:0.74rem;color:#6b7280;">CSM: ' + acc.CSM_Name + '</span>' : '';
+
+                return '<tr>' +
+                    '<td><strong>' + name + '</strong>' + csm + '</td>' +
+                    '<td><div class="ap-health-bar">' +
+                        '<div class="ap-health-track"><div class="ap-health-fill ' + cls + '" style="width:' + hs.toFixed(0) + '%"></div></div>' +
+                        '<span style="font-weight:600;color:' + color + '">' + hs.toFixed(0) + '</span>' +
+                    '</div></td>' +
+                    '<td style="white-space:nowrap;font-weight:600;">' + fmt(mrr) + '</td>' +
+                    '<td><div class="ap-actions-list">' + factors.map(function(f) { return '<div class="ap-action-item">⚠️ ' + f + '</div>'; }).join('') + '</div></td>' +
+                    '<td><div class="ap-actions-list">' + actions.map(function(a) { return '<div class="ap-action-item">' + a + '</div>'; }).join('') + '</div></td>' +
+                    '<td><span class="ap-priority-badge ' + priority.cls + '">' + priority.label + '</span></td>' +
+                    '</tr>';
+            }).join('');
+        },
+
+        filter: function(type, btn) {
+            this._filter = type;
+            document.querySelectorAll('.ap-filter-btn').forEach(function(b) { b.classList.remove('active'); });
+            if (btn) btn.classList.add('active');
+            this.render();
+        }
+    };
+
+    // Enganchar renderTrendsDashboard para inicializar el plan
+    (function() {
+        var orig = window.renderTrendsDashboard;
+        if (typeof orig === 'function') {
+            window.renderTrendsDashboard = function() {
+                orig.apply(this, arguments);
+                ActionPlan.init();
+            };
+        }
+    })();
+    </script>
     </div>
 </body>
 </html>

@@ -11,10 +11,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Actualidad - Dashboard de Cuentas</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="alternate icon" href="favicon.svg">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="navigation.css">
     <link rel="stylesheet" href="help-system.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <style>
+    /* ===== PAGINACIÓN ===== */
+    .pagination-controls {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        padding: 0.75rem 0 0;
+        margin-top: 0.5rem;
+        border-top: 1px solid #e5e7eb;
+    }
+    .pagination-info { color: #6b7280; font-size: 0.85rem; }
+    .pagination-size {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.84rem;
+        color: #374151;
+    }
+    .pagination-size select {
+        padding: 0.22rem 0.45rem;
+        border: 1px solid #d1d5db;
+        border-radius: 5px;
+        font-size: 0.84rem;
+        cursor: pointer;
+        background: #fff;
+    }
+    .pagination-buttons { display: flex; gap: 0.25rem; flex-wrap: wrap; align-items: center; }
+    .pg-btn {
+        min-width: 2rem;
+        height: 2rem;
+        padding: 0 0.4rem;
+        border: 1px solid #d1d5db;
+        background: #f9fafb;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.82rem;
+        font-weight: 500;
+        color: #374151;
+        transition: all 0.15s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .pg-btn:hover:not(:disabled) { background: #e0e7ff; border-color: #6366f1; color: #4338ca; }
+    .pg-btn.active { background: #1e40af; color: #fff; border-color: #1e40af; font-weight: 700; }
+    .pg-btn:disabled { opacity: 0.38; cursor: not-allowed; }
+    </style>
 </head>
 <body>
     <!-- Google Tag Manager (noscript) -->
@@ -377,6 +428,7 @@
                     </tbody>
                 </table>
             </div>
+            <div id="paginationContainer"></div>
         </section>
     </div>
 
@@ -396,8 +448,114 @@
     <script src="demo-data.js"></script>
     <script src="script_actualidad.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>if(typeof window.jspdf==='undefined'&&typeof window.jsPDF==='undefined'){var s=document.createElement('script');s.src='https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js';document.head.appendChild(s);}</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <script src="pdf-export.js"></script>
+    <script>
+    /* ===== PAGINACIÓN TABLA DE CUENTAS ===== */
+    var Pagination = {
+        _pageSize: 25,
+        _page: 1,
+
+        // Obtiene filas reales (ignora placeholder colspan)
+        _getRows: function() {
+            var tbody = document.getElementById('accountsTableBody');
+            if (!tbody) return [];
+            var all = Array.from(tbody.querySelectorAll('tr'));
+            if (all.length === 1 && all[0].querySelector('td[colspan]')) return [];
+            return all;
+        },
+
+        // Llamar tras renderizar la tabla
+        refresh: function() {
+            this._page = 1;
+            this.render();
+        },
+
+        render: function() {
+            var container = document.getElementById('paginationContainer');
+            if (!container) return;
+
+            var rows  = this._getRows();
+            var total = rows.length;
+            if (total === 0) { container.innerHTML = ''; return; }
+
+            var size  = this._pageSize === 'all' ? total : this._pageSize;
+            var start = (this._page - 1) * size;
+            var end   = Math.min(start + size, total);
+
+            // Mostrar/ocultar filas
+            rows.forEach(function(row, i) {
+                row.style.display = (i >= start && i < end) ? '' : 'none';
+            });
+
+            var totalPages = this._pageSize === 'all' ? 1 : Math.ceil(total / size);
+            var from = start + 1;
+
+            // Botones de página
+            var pageBtns = '';
+            if (totalPages > 1) {
+                var pg = this._page;
+                pageBtns += '<button class="pg-btn" onclick="Pagination.goto(' + (pg - 1) + ')"' + (pg === 1 ? ' disabled' : '') + '>‹</button>';
+                var maxV = 5, pStart = Math.max(1, pg - 2), pEnd = Math.min(totalPages, pStart + maxV - 1);
+                if (pEnd - pStart < maxV - 1) pStart = Math.max(1, pEnd - maxV + 1);
+                if (pStart > 1) {
+                    pageBtns += '<button class="pg-btn" onclick="Pagination.goto(1)">1</button>';
+                    if (pStart > 2) pageBtns += '<span style="padding:0 0.25rem;color:#9ca3af;line-height:2rem">…</span>';
+                }
+                for (var p = pStart; p <= pEnd; p++) {
+                    pageBtns += '<button class="pg-btn' + (p === pg ? ' active' : '') + '" onclick="Pagination.goto(' + p + ')">' + p + '</button>';
+                }
+                if (pEnd < totalPages) {
+                    if (pEnd < totalPages - 1) pageBtns += '<span style="padding:0 0.25rem;color:#9ca3af;line-height:2rem">…</span>';
+                    pageBtns += '<button class="pg-btn" onclick="Pagination.goto(' + totalPages + ')">' + totalPages + '</button>';
+                }
+                pageBtns += '<button class="pg-btn" onclick="Pagination.goto(' + (pg + 1) + ')"' + (pg === totalPages ? ' disabled' : '') + '>›</button>';
+            }
+
+            container.innerHTML =
+                '<div class="pagination-controls">' +
+                    '<div class="pagination-info">Mostrando <strong>' + from + '–' + end + '</strong> de <strong>' + total + '</strong> cuentas</div>' +
+                    '<div class="pagination-size"><label>Por página:&nbsp;</label>' +
+                        '<select onchange="Pagination.setSize(this.value)">' +
+                            '<option value="10"'  + (this._pageSize === 10      ? ' selected' : '') + '>10</option>' +
+                            '<option value="25"'  + (this._pageSize === 25      ? ' selected' : '') + '>25</option>' +
+                            '<option value="50"'  + (this._pageSize === 50      ? ' selected' : '') + '>50</option>' +
+                            '<option value="all"' + (this._pageSize === 'all'   ? ' selected' : '') + '>Todas</option>' +
+                        '</select>' +
+                    '</div>' +
+                    '<div class="pagination-buttons">' + pageBtns + '</div>' +
+                '</div>';
+        },
+
+        goto: function(page) {
+            var rows = this._getRows();
+            var size = this._pageSize === 'all' ? rows.length : this._pageSize;
+            var totalPages = Math.ceil(rows.length / size);
+            if (page < 1 || page > totalPages) return;
+            this._page = page;
+            this.render();
+            var sec = document.querySelector('.table-section');
+            if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        },
+
+        setSize: function(val) {
+            this._pageSize = val === 'all' ? 'all' : parseInt(val);
+            this._page = 1;
+            this.render();
+        }
+    };
+
+    // Envolver renderAccountsTable para llamar Pagination.refresh() después
+    // Ambos scripts ya están cargados en este punto (inline script al final del body)
+    if (typeof renderAccountsTable === 'function') {
+        var _origRenderAccounts = renderAccountsTable;
+        window.renderAccountsTable = function() {
+            _origRenderAccounts.apply(this, arguments);
+            Pagination.refresh();
+        };
+    }
+    </script>
     </div>
 </body>
 </html>
