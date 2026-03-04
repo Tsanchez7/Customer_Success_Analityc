@@ -235,6 +235,15 @@
     };
 
     async function _generatePDFReportInternal() {
+        // Validar que hay datos cargados
+        const hasData = typeof excelData !== 'undefined' && excelData && 
+                       (excelData.accounts.length > 0 || excelData.periodData.length > 0);
+        
+        if (!hasData && !window.isDemoData) {
+            alert('⚠️ No hay datos cargados.\n\nPor favor, carga un archivo Excel con datos o usa los datos de demostración antes de generar el informe PDF.');
+            return;
+        }
+
         // Normalizar referencia jsPDF en el momento del clic (cubre CDN fallback tardío)
         if (typeof window.jspdf === 'undefined' && typeof window.jsPDF !== 'undefined') {
             window.jspdf = { jsPDF: window.jsPDF };
@@ -373,112 +382,12 @@
         doc.setTextColor(80, 120, 180);
         doc.text('FECHA', p0RightX, rowBot + 5);
 
-        /* ── PÁGINA 2: ÍNDICE — DEJAR EN BLANCO POR AHORA ──────────────── */
+        /* ── PÁGINA 2: ÍNDICE — PLACEHOLDER (se rellena al final con números reales) ── */
         doc.addPage();
         const tocPageNumber = doc.internal.getNumberOfPages();
 
-        // Variables para tracking de números de página reales
+        // Variables para tracking de números de página reales (se asignan durante la generación)
         let pgResumen, pgHistorico, pgAncla, pgPlanResumen, pgSalud, pgPlanesStart, pgPlanesEnd;
-
-        // Dibujar índice (con soporte multi-página)
-        const TOC_PAGE_LIMIT = PH - 28; // margen inferior efectivo
-        const _tocPageHeader = () => {
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(11);
-            doc.setTextColor(...COLORS.dark);
-            doc.text('Índice de Contenidos (cont.)', M, 34);
-        };
-        let yIdx = 34;
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(11);
-        doc.setTextColor(...COLORS.dark);
-        doc.text('Índice de Contenidos', M, yIdx);
-        yIdx += 2;
-
-        let tocRowCount = 0;
-        tocEntries.forEach((entry) => {
-            const rowH   = entry.isSection ? 15 : 12;
-            const indentX = entry.indent ? 10 : 0;
-
-            // Page break if row won't fit
-            if (yIdx + rowH > TOC_PAGE_LIMIT) {
-                doc.addPage();
-                _pageHeader(doc, PW, M, '   Índice de Contenidos');
-                yIdx = 34;
-                tocRowCount = 0;
-                _tocPageHeader();
-                yIdx += 4;
-            }
-
-            yIdx += entry.isSection ? 11 : 9;
-
-            if (tocRowCount % 2 === 0) {
-                doc.setFillColor(245, 247, 252);
-                doc.rect(M, yIdx - 5, CW, entry.isSection ? 11 : 9, 'F');
-            }
-            doc.setFillColor(...entry.color);
-            if (entry.isSection) {
-                doc.roundedRect(M + indentX, yIdx - 4, 4, entry.isSection ? 7 : 5, 1, 1, 'F');
-            } else {
-                doc.circle(M + indentX + 2.5, yIdx - 0.8, 1.5, 'F');
-            }
-            doc.setFont('helvetica', entry.isSection ? 'bold' : 'normal');
-            doc.setFontSize(8.5);
-            doc.setTextColor(...entry.color);
-            doc.text('Pag. ' + entry.page, M + indentX + 7, yIdx);
-            doc.setTextColor(...COLORS.dark);
-            doc.setFont('helvetica', entry.isSection ? 'bold' : 'normal');
-            doc.setFontSize(entry.isSection ? 9 : 8.5);
-            doc.text(entry.title, M + indentX + 26, yIdx);
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(7.5);
-            doc.setTextColor(...COLORS.muted);
-            doc.text(entry.desc, M + indentX + 26, yIdx + 3.8);
-            yIdx += entry.isSection ? 4 : 3;
-            tocRowCount++;
-        });
-
-        // Leyenda de colores — nueva página si no cabe (mínimo 90 pt libres)
-        if (yIdx + 100 > TOC_PAGE_LIMIT) {
-            doc.addPage();
-            _pageHeader(doc, PW, M, '   Índice — Leyenda de Colores');
-            yIdx = 34;
-        }
-        yIdx += 14;
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(11);
-        doc.setTextColor(...COLORS.dark);
-        doc.text('Leyenda de Colores', M, yIdx);
-        yIdx += 2;
-
-        const legend = [
-            { color: COLORS.primary,  name: 'Azul',    use: 'KPIs principales, cabeceras de tabla y secciones de navegacion' },
-            { color: COLORS.success,  name: 'Verde',   use: 'Resultados positivos y cuentas en estado Excelente (Health ≥ 80)' },
-            { color: [251, 191, 36],  name: 'Amarillo',use: 'Cuentas en estado Bueno (Health 60-79), advertencias leves' },
-            { color: COLORS.orange,   name: 'Naranja', use: 'Cuentas En Riesgo (Health 40-59), atencion recomendada' },
-            { color: COLORS.danger,   name: 'Rojo',    use: 'Cuentas en estado Cr\u00edtico (Health < 40), acci\u00f3n urgente' },
-            { color: COLORS.purple,   name: 'Morado',  use: 'Métricas de engagement y actividad del producto' },
-            { color: COLORS.dark,     name: 'Marino',  use: 'Cabeceras de secciones, portadas y elementos estructurales' },
-            { color: COLORS.muted,    name: 'Gris',    use: 'Textos secundarios, etiquetas y datos de contexto' },
-        ];
-
-        legend.forEach((l, i) => {
-            yIdx += 9;
-            if (i % 2 === 0) {
-                doc.setFillColor(245, 247, 252);
-                doc.rect(M, yIdx - 5, CW, 9, 'F');
-            }
-            doc.setFillColor(...l.color);
-            doc.roundedRect(M, yIdx - 4, 6, 5.5, 1, 1, 'F');
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(8.5);
-            doc.setTextColor(...l.color);
-            doc.text(l.name, M + 10, yIdx);
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(8);
-            doc.setTextColor(...COLORS.dark);
-            doc.text(l.use, M + 36, yIdx);
-        });
 
         /* ── PÁGINA 3: RESUMEN EJECUTIVO ──────────────────────────────────── */
         doc.addPage();
@@ -1094,7 +1003,9 @@
                 document.body.removeChild(tempLink);
                 URL.revokeObjectURL(blobUrl);
             }, 3000);
+            console.log('[PDF Export] PDF descargado exitosamente:', fname);
         } catch (saveErr) {
+            console.error('[PDF Export] Error al guardar:', saveErr);
             // Último recurso: abrir en nueva pestaña como data URI
             const dataUri = doc.output('datauristring');
             const w = window.open(dataUri, '_blank');
