@@ -288,7 +288,7 @@ function renderHistoricalCharts(years, metrics) {
                 y: {
                     beginAtZero: true,
                     ticks: {
-                        callback: (value) => '$' + (value / 1000).toFixed(0) + 'K'
+                        callback: (value) => '€' + (value / 1000).toFixed(0) + 'K'
                     }
                 }
             }
@@ -439,7 +439,7 @@ function renderHistoricalCharts(years, metrics) {
                 y: {
                     beginAtZero: true,
                     ticks: {
-                        callback: (value) => '$' + (value / 1000).toFixed(0) + 'K'
+                        callback: (value) => '€' + (value / 1000).toFixed(0) + 'K'
                     }
                 }
             }

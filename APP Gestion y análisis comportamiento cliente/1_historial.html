@@ -135,6 +135,52 @@
     .anchor-badge.senior  { background: #dcfce7; color: #166534; }
     .anchor-badge.growing { background: #ede9fe; color: #5b21b6; }
     .anchor-badge.new     { background: #f0f9ff; color: #1e40af; }
+    .anchor-pagination-controls {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        padding: 0.75rem 0 0;
+        margin-top: 0.5rem;
+        border-top: 1px solid #e5e7eb;
+    }
+    .anchor-pagination-info { color: #6b7280; font-size: 0.85rem; }
+    .anchor-pagination-size {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.84rem;
+        color: #374151;
+    }
+    .anchor-pagination-size select {
+        padding: 0.22rem 0.45rem;
+        border: 1px solid #d1d5db;
+        border-radius: 5px;
+        font-size: 0.84rem;
+        cursor: pointer;
+        background: #fff;
+    }
+    .anchor-pagination-buttons { display: flex; gap: 0.25rem; flex-wrap: wrap; align-items: center; }
+    .anchor-pg-btn {
+        min-width: 2rem;
+        height: 2rem;
+        padding: 0 0.4rem;
+        border: 1px solid #d1d5db;
+        background: #f9fafb;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.82rem;
+        font-weight: 500;
+        color: #374151;
+        transition: all 0.15s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .anchor-pg-btn:hover:not(:disabled) { background: #e0e7ff; border-color: #6366f1; color: #4338ca; }
+    .anchor-pg-btn.active { background: #1e40af; color: #fff; border-color: #1e40af; font-weight: 700; }
+    .anchor-pg-btn:disabled { opacity: 0.38; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -286,7 +332,7 @@
                         MRR Inicial (2016)
                         <span class="info-icon" data-tooltip="Ingresos recurrentes mensuales al inicio del período analizado">?</span>
                     </div>
-                    <div class="comparison-value" id="mrrInitial">$0</div>
+                    <div class="comparison-value" id="mrrInitial">€0</div>
                     <div class="comparison-sublabel">Punto de partida</div>
                 </div>
                 <div class="comparison-card">
@@ -294,7 +340,7 @@
                         MRR Final (2026)
                         <span class="info-icon" data-tooltip="Ingresos recurrentes mensuales actuales">?</span>
                     </div>
-                    <div class="comparison-value" id="mrrFinal">$0</div>
+                    <div class="comparison-value" id="mrrFinal">€0</div>
                     <div class="comparison-sublabel">Valor actual</div>
                 </div>
                 <div class="comparison-card highlight">
@@ -433,6 +479,7 @@
                     </tbody>
                 </table>
             </div>
+            <div id="anchorPaginationContainer"></div>
         </section>
 
         <!-- HITOS HISTÓRICOS -->
@@ -471,6 +518,9 @@
     <script>
     /* ===== CUENTAS ANCLA ===== */
     var AccountAnchor = {
+        _rankedProfiles: [],
+        _pageSize: 10,
+        _page: 1,
 
         init: function() {
             var accounts   = (typeof excelData !== 'undefined' && excelData.accounts)   ? excelData.accounts   : [];
@@ -546,7 +596,7 @@
             var topMRR = byMRR[0] ? byMRR[0].mrrAcc : 0;
             var elites = profiles.filter(function(p) { return p.stability >= 80; }).length;
             var maxYrs = Math.max.apply(null, profiles.map(function(p) { return p.yearsActive; })) || 0;
-            var fmt    = function(v) { return v >= 1000000 ? '$' + (v/1000000).toFixed(1) + 'M' : v >= 1000 ? '$' + Math.round(v/1000) + 'K' : '$' + v; };
+            var fmt    = function(v) { return v >= 1000000 ? '€' + (v/1000000).toFixed(1) + 'M' : v >= 1000 ? '€' + Math.round(v/1000) + 'K' : '€' + v; };
 
             var e = function(id) { return document.getElementById(id); };
             if (e('anchorTotalAccounts')) e('anchorTotalAccounts').textContent = profiles.length;
@@ -564,7 +614,7 @@
             var byNPS      = profiles.slice().sort(function(a, b) { return b.avgNPS - a.avgNPS; }).slice(0, 5);
             var byGrowth   = profiles.slice().sort(function(a, b) { return b.expansion - a.expansion; }).slice(0, 5);
 
-            var fmt    = function(v) { return v >= 1000000 ? '$' + (v/1000000).toFixed(1) + 'M' : v >= 1000 ? '$' + Math.round(v/1000) + 'K' : '$' + v; };
+            var fmt    = function(v) { return v >= 1000000 ? '€' + (v/1000000).toFixed(1) + 'M' : v >= 1000 ? '€' + Math.round(v/1000) + 'K' : '€' + v; };
             var rCls   = function(i) { return i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-n'; };
             var rLabel = function(i) { return i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i+1); };
 
@@ -613,16 +663,44 @@
             var tbody = document.getElementById('anchorTableBody');
             if (!tbody) return;
 
-            // Normalizar MRR acumulado para calcular estabilidad final con peso de ingresos
+            var paginationContainer = document.getElementById('anchorPaginationContainer');
+
+            this._rankedProfiles = this._buildRankedProfiles(profiles);
+            this._page = 1;
+
+            if (this._rankedProfiles.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:#9ca3af;padding:1.5rem;">📂 No hay datos para mostrar en el ranking</td></tr>';
+                if (paginationContainer) paginationContainer.innerHTML = '';
+                return;
+            }
+
+            this._renderTablePage();
+            this._renderPagination();
+        },
+
+        // Normalizar MRR acumulado para calcular estabilidad final con peso de ingresos
+        _buildRankedProfiles: function(profiles) {
             var maxMRR = Math.max.apply(null, profiles.map(function(p) { return p.mrrAcc; })) || 1;
-            var ranked = profiles.map(function(p) {
+            return profiles.map(function(p) {
                 var mrrNormScore = (p.mrrAcc / maxMRR) * 100;
                 // Recalcular stability incluyendo peso de MRR
                 var s = p.stability * 0.6 + mrrNormScore * 0.4;
                 return Object.assign({}, p, { finalScore: Math.min(Math.round(s), 100) });
             }).sort(function(a, b) { return b.finalScore - a.finalScore; });
+        },
 
-            var fmt    = function(v) { return v >= 1000000 ? '$' + (v/1000000).toFixed(1) + 'M' : v >= 1000 ? '$' + Math.round(v/1000) + 'K' : '$' + v; };
+        _renderTablePage: function() {
+            var tbody = document.getElementById('anchorTableBody');
+            if (!tbody) return;
+
+            var ranked = this._rankedProfiles;
+            var total = ranked.length;
+            var size = this._pageSize;
+            var start = (this._page - 1) * size;
+            var end = Math.min(start + size, total);
+            var pageRows = ranked.slice(start, end);
+
+            var fmt    = function(v) { return v >= 1000000 ? '€' + (v/1000000).toFixed(1) + 'M' : v >= 1000 ? '€' + Math.round(v/1000) + 'K' : '€' + v; };
             var cat    = function(p) {
                 if (p.finalScore >= 80) return '<span class="anchor-badge elite">🌟 Élite</span>';
                 if (p.finalScore >= 65) return '<span class="anchor-badge senior">💚 Senior</span>';
@@ -632,8 +710,9 @@
             var nrrColor = function(v) { return v >= 110 ? '#10b981' : v >= 100 ? '#34d399' : v >= 90 ? '#f59e0b' : '#ef4444'; };
             var npsColor = function(v) { return v >= 8 ? '#10b981' : v >= 6 ? '#f59e0b' : '#ef4444'; };
 
-            tbody.innerHTML = ranked.map(function(p, i) {
-                var medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
+            tbody.innerHTML = pageRows.map(function(p, i) {
+                var absoluteIndex = start + i;
+                var medal = absoluteIndex === 0 ? '🥇' : absoluteIndex === 1 ? '🥈' : absoluteIndex === 2 ? '🥉' : (absoluteIndex + 1);
                 return '<tr>' +
                     '<td style="font-weight:700;text-align:center;font-size:1.05rem;">' + medal + '</td>' +
                     '<td><strong title="CSM: ' + p.csm + '">' + p.name + '</strong>' +
@@ -651,6 +730,81 @@
                     '<td>' + cat(p) + '</td>' +
                 '</tr>';
             }).join('');
+        },
+
+        _renderPagination: function() {
+            var container = document.getElementById('anchorPaginationContainer');
+            if (!container) return;
+
+            var total = this._rankedProfiles.length;
+            if (total === 0) {
+                container.innerHTML = '';
+                return;
+            }
+
+            var size = this._pageSize;
+            var totalPages = Math.ceil(total / size);
+            var start = (this._page - 1) * size;
+            var end = Math.min(start + size, total);
+            var from = start + 1;
+
+            var pageBtns = '';
+            if (totalPages > 1) {
+                var pg = this._page;
+                pageBtns += '<button class="anchor-pg-btn" onclick="AccountAnchor.gotoPage(' + (pg - 1) + ')"' + (pg === 1 ? ' disabled' : '') + '>‹</button>';
+                var maxV = 5;
+                var pStart = Math.max(1, pg - 2);
+                var pEnd = Math.min(totalPages, pStart + maxV - 1);
+                if (pEnd - pStart < maxV - 1) pStart = Math.max(1, pEnd - maxV + 1);
+
+                if (pStart > 1) {
+                    pageBtns += '<button class="anchor-pg-btn" onclick="AccountAnchor.gotoPage(1)">1</button>';
+                    if (pStart > 2) pageBtns += '<span style="padding:0 0.25rem;color:#9ca3af;line-height:2rem">…</span>';
+                }
+
+                for (var p = pStart; p <= pEnd; p++) {
+                    pageBtns += '<button class="anchor-pg-btn' + (p === pg ? ' active' : '') + '" onclick="AccountAnchor.gotoPage(' + p + ')">' + p + '</button>';
+                }
+
+                if (pEnd < totalPages) {
+                    if (pEnd < totalPages - 1) pageBtns += '<span style="padding:0 0.25rem;color:#9ca3af;line-height:2rem">…</span>';
+                    pageBtns += '<button class="anchor-pg-btn" onclick="AccountAnchor.gotoPage(' + totalPages + ')">' + totalPages + '</button>';
+                }
+
+                pageBtns += '<button class="anchor-pg-btn" onclick="AccountAnchor.gotoPage(' + (pg + 1) + ')"' + (pg === totalPages ? ' disabled' : '') + '>›</button>';
+            }
+
+            container.innerHTML =
+                '<div class="anchor-pagination-controls">' +
+                    '<div class="anchor-pagination-info">Mostrando <strong>' + from + '–' + end + '</strong> de <strong>' + total + '</strong> cuentas</div>' +
+                    '<div class="anchor-pagination-size"><label>Por página:&nbsp;</label>' +
+                        '<select onchange="AccountAnchor.setPageSize(this.value)">' +
+                            '<option value="10"' + (this._pageSize === 10 ? ' selected' : '') + '>10</option>' +
+                            '<option value="25"' + (this._pageSize === 25 ? ' selected' : '') + '>25</option>' +
+                            '<option value="50"' + (this._pageSize === 50 ? ' selected' : '') + '>50</option>' +
+                            '<option value="100"' + (this._pageSize === 100 ? ' selected' : '') + '>100</option>' +
+                        '</select>' +
+                    '</div>' +
+                    '<div class="anchor-pagination-buttons">' + pageBtns + '</div>' +
+                '</div>';
+        },
+
+        gotoPage: function(page) {
+            var total = this._rankedProfiles.length;
+            var totalPages = Math.ceil(total / this._pageSize);
+            if (page < 1 || page > totalPages) return;
+
+            this._page = page;
+            this._renderTablePage();
+            this._renderPagination();
+        },
+
+        setPageSize: function(value) {
+            var parsed = parseInt(value, 10);
+            this._pageSize = [10, 25, 50, 100].indexOf(parsed) >= 0 ? parsed : 10;
+            this._page = 1;
+            this._renderTablePage();
+            this._renderPagination();
         }
     };
 
