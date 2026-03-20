@@ -101,11 +101,23 @@
     .anchor-cat-val  { font-weight: 700; color: #3b82f6; white-space: nowrap; font-size: 0.82rem; }
     .anchor-cat-sub  { font-size: 0.72rem; color: #6b7280; }
 
-    .anchor-table-wrap { overflow-x: auto; margin-top: 0.25rem; }
+    .anchor-table-wrap {
+        overflow-x: auto;
+        overflow-y: visible;
+        -webkit-overflow-scrolling: touch;
+        margin-top: 0.25rem;
+        max-width: 100%;
+        padding-right: 0.75rem; /* evita que se “corte” el borde derecho (Categoría) */
+        box-sizing: border-box;
+    }
     .anchor-table {
-        width: 100%;
+        /* Importante: deja que la tabla mida lo que necesita y active el scroll del wrapper */
+        width: max-content;
+        display: inline-table;
         border-collapse: collapse;
         font-size: 0.82rem;
+        /* Mantiene columnas legibles y fuerza scroll horizontal cuando no cabe */
+        min-width: 1020px;
     }
     .anchor-table th {
         background: #f8fafc;
@@ -114,12 +126,42 @@
         font-weight: 600;
         color: #475569;
         border-bottom: 2px solid #e2e8f0;
-        white-space: nowrap;
+        white-space: normal;
+        line-height: 1.15;
+    }
+
+    /* Permite que el título “MRR Acumulado (histórico)” use 2 líneas sin ensanchar toda la tabla */
+    .anchor-table th:nth-child(5) {
+        white-space: normal;
+        line-height: 1.15;
+        min-width: 130px;
+    }
+
+    /* Da espacio mínimo a Categoría para que el badge no se corte */
+    .anchor-table th:last-child,
+    .anchor-table td:last-child {
+        min-width: 110px;
     }
     .anchor-table td {
         padding: 0.55rem 0.7rem;
         border-bottom: 1px solid #f1f5f9;
         vertical-align: middle;
+    }
+
+    /* Columna final (Categoría): evita corte y deja aire al borde derecho */
+    .anchor-table th:last-child,
+    .anchor-table td:last-child {
+        padding-right: 1rem;
+        white-space: nowrap;
+        min-width: 110px;
+    }
+
+    /* Badge dentro de Categoría: nunca se debe recortar */
+    .anchor-table td:last-child .anchor-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        max-width: none;
     }
     .anchor-table tr:hover td { background: #f8fafc; }
     .anchor-stability-bar { display: flex; align-items: center; gap: 0.4rem; }
@@ -463,10 +505,10 @@
                             <th>Cuenta</th>
                             <th>Segmento</th>
                             <th>MRR Actual</th>
-                            <th>MRR Acumulado (histórico)</th>
+                            <th>MRR Acumulado<br><span style="font-weight:500;opacity:0.85;">(histórico)</span></th>
                             <th>Años activa</th>
                             <th>NPS medio</th>
-                            <th>NRR contribuido</th>
+                            <th>NRR<br><span style="font-weight:500;opacity:0.85;">contribuido</span></th>
                             <th>Estabilidad</th>
                             <th>Categoría</th>
                         </tr>
