@@ -47,7 +47,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 1rem 1.5rem;
+    padding: 0.85rem 1.25rem;
     color: rgba(255, 255, 255, 0.9);
     text-decoration: none;
     font-weight: 500;
@@ -258,6 +258,48 @@
     display: none;
 }
 
+/* ===== RESPONSIVE: evitar solapamiento de "Cargar Excel" ===== */
+@media (max-width: 1400px) {
+    .nav-header {
+        flex-wrap: wrap;
+        row-gap: 0.5rem;
+    }
+
+    .nav-menu {
+        flex-wrap: wrap;
+        row-gap: 0.25rem;
+    }
+
+    .nav-file-upload {
+        margin-top: 0.35rem;
+        width: 100%;
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 768px) {
+    .nav-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .nav-menu {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .nav-file-upload {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .nav-file-actions {
+        flex-wrap: wrap;
+        row-gap: 0.4rem;
+    }
+}
+
 .nav-file-name {
     font-size: 0.85rem;
     color: rgba(255, 255, 255, 0.8);
@@ -267,37 +309,31 @@
     white-space: nowrap;
 }
 
-/* Responsive */
+/* Ajustes finos móvil: compactar botón "Cargar Excel" sin romper layout */
 @media (max-width: 768px) {
-    .nav-header {
-        flex-direction: column;
-        gap: 1rem;
-        padding: 1rem;
-    }
-    
-    .nav-menu {
-        width: 100%;
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-    
     .nav-link {
         padding: 0.8rem 1rem;
         font-size: 0.9rem;
     }
-    
+
     .nav-file-upload {
         width: 100%;
-        justify-content: center;
-        flex-direction: column;
-        gap: 0.5rem;
+        justify-content: flex-start;
     }
-    
+
     .nav-file-actions {
-        flex-wrap: wrap;
-        justify-content: center;
+        justify-content: flex-start;
     }
-    
+
+    .nav-file-label {
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        padding: 0.5rem 0.9rem;
+        min-width: 96px;
+        text-align: center;
+    }
+
     .nav-file-tooltip {
         width: 90vw;
         max-width: 360px;
@@ -306,21 +342,16 @@
         transform: translateX(-50%) translateY(-10px);
         max-height: 70vh;
     }
-    
+
     .nav-file-info:hover .nav-file-tooltip {
         transform: translateX(-50%) translateY(0);
         pointer-events: auto;
     }
-    
+
     .nav-file-tooltip::before {
         left: 50%;
         right: auto;
         transform: translateX(-50%);
-    }
-    
-    .nav-download-template {
-        font-size: 0.85rem;
-        padding: 0.5rem 0.8rem;
     }
 }
 
