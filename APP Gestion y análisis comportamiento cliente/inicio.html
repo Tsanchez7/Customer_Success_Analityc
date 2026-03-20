@@ -126,57 +126,6 @@
         .cta-button:hover .cta-icon {
             transform: translateX(5px);
         }
-        /* Contador de Visitas */
-        .visit-counter {
-            margin: 3rem auto 0;
-            padding: 1.5rem 2.5rem;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            display: block;
-            max-width: 280px;
-            animation: fadeInUp 0.8s ease-out 0.6s backwards;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .visit-counter:hover {
-            transform: translateY(-5px);
-            background: rgba(255, 255, 255, 0.2);
-            border-color: rgba(255, 255, 255, 0.5);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-
-        .counter-label {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: rgba(255, 255, 255, 0.9);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 0.5rem;
-        }
-
-
-        .counter-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        .counter-icon {
-            font-size: 2rem;
-            animation: bounce 2s ease-in-out infinite;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
         /* Key Metrics Section */
         .key-metrics {
             max-width: 1000px;
@@ -678,14 +627,6 @@
             <span>Start Analysis</span>
             <span class="cta-icon">→</span>
         </a>
-        
-        <div class="visit-counter">
-            <div class="counter-label">👥 Visitas Totales</div>
-            <div class="counter-value">
-                <span class="counter-icon">📊</span>
-                <span id="visitCount">1,100</span>
-            </div>
-        </div>
     </div>
 
     <!-- Key Metrics Section -->
@@ -942,7 +883,6 @@
         </p>
     </div>
 
-    <script src="visit-tracker.js"></script>
     <script>
         // Generate animated particles
         const particlesContainer = document.getElementById('particles');
