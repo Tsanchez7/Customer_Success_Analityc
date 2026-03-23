@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-HV22PJ7RGC"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-HV22PJ7RGC');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Purpose - Customer Success Analytics</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="alternate icon" href="favicon.svg">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="navigation.css">
+    <link rel="stylesheet" href="help-system.css">
+
+    <style>
+        /* Business Purpose: forzar 4 cards en una fila en pantallas anchas */
+        @media (min-width: 1280px) {
+            .bp-dashboard-grid {
+                grid-template-columns: repeat(4, minmax(220px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <a href="inicio.html">
+                <span class="sidebar-logo-icon">📊</span>
+                <span class="sidebar-logo-text">CS Analytics</span>
+            </a>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="sidebar-nav-item">
+                <a href="inicio.html" class="sidebar-nav-link" title="Volver al Inicio">
+                    <span class="sidebar-nav-icon">🏠</span>
+                    <span class="sidebar-nav-text">Inicio</span>
+                </a>
+            </div>
+            <div class="sidebar-nav-section">
+                <div class="sidebar-section-title">Marco consultivo</div>
+                <div class="sidebar-nav-item">
+                    <a href="business_purpose.html" class="sidebar-nav-link active" title="Business Purpose y metodología">
+                        <span class="sidebar-nav-icon">🧭</span>
+                        <span class="sidebar-nav-text">Business Purpose</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="sidebar-nav-section">
+                <div class="sidebar-section-title">Escenarios de análisis</div>
+                <div class="sidebar-submenu">
+                    <div class="sidebar-nav-item">
+                        <a href="1_historial.html" class="sidebar-nav-link" title="Historial 10 Años">
+                            <span class="sidebar-nav-icon">📈</span>
+                            <span class="sidebar-nav-text">Historial</span>
+                        </a>
+                    </div>
+                    <div class="sidebar-nav-item">
+                        <a href="2_actualidad.html" class="sidebar-nav-link" title="Actualidad 2026">
+                            <span class="sidebar-nav-icon">⚡</span>
+                            <span class="sidebar-nav-text">Actualidad</span>
+                        </a>
+                    </div>
+                    <div class="sidebar-nav-item">
+                        <a href="3_tendencias.html" class="sidebar-nav-link" title="Tendencias 2027">
+                            <span class="sidebar-nav-icon">📉</span>
+                            <span class="sidebar-nav-text">Tendencias</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="https://www.linkedin.com/in/tamarasanchezdiaz/" target="_blank" rel="noopener noreferrer" class="sidebar-footer-author">
+                <img src="tamara-profile.jpg" alt="Tamara Sánchez Díaz" class="sidebar-footer-photo">
+                <div class="sidebar-footer-info">
+                    <span class="sidebar-footer-name">Tamara Sánchez Díaz</span>
+                    <span class="sidebar-footer-title">Customer Success Specialist</span>
+                </div>
+            </a>
+            <p class="sidebar-footer-copyright">© 2026</p>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT WRAPPER -->
+    <div class="main-wrapper">
+        <div class="container">
+            <header class="header">
+                <h1>🧭 Business Purpose</h1>
+                <p>De métricas a decisiones: cómo usar la app para actuar</p>
+            </header>
+
+            <section class="context-box">
+                <h2>🎯 Objetivo de la app</h2>
+                <p>
+                    Herramienta de <strong>Customer Analytics</strong> para monitorizar la salud del cliente, detectar riesgo de churn y
+                    generar <strong>insights accionables</strong> para negocio.
+                </p>
+                <p style="margin-top:0.5rem;">
+                    En la práctica, esta app te ayuda a responder: <strong>¿qué clientes están en riesgo?, ¿por qué?, ¿qué hacemos ahora?</strong>
+                </p>
+            </section>
+
+            <section class="summary-section">
+                <h2>🧭 Customer Health Dashboard</h2>
+                <div class="global-analysis-container bp-dashboard-grid">
+                    <div class="analysis-card">
+                        <h3>Qué mirar primero</h3>
+                        <div class="analysis-content">
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                <li style="margin-bottom: 0.45rem;">📊 KPIs globales (estado del negocio)</li>
+                                <li style="margin-bottom: 0.45rem;">🧠 Key Insights (drivers y foco)</li>
+                                <li style="margin-bottom: 0.45rem;">✅ Tabla por cuenta (prioridad + acción)</li>
+                            </ul>
+                            <p style="margin-top:0.65rem;">Objetivo: <strong>priorizar acciones</strong> por impacto (€) y urgencia.</p>
+                        </div>
+                    </div>
+
+                    <div class="analysis-card">
+                        <h3>Health Score (cómo se calcula)</h3>
+                        <div class="analysis-content">
+                            <p><strong>0–100</strong>. Señales (peso): Uso 30% · Adopción 25% · Tickets 25% · NPS 20%.</p>
+                            <p style="margin-top:0.6rem;"><strong>Bandas</strong>: 🟢 >= 80 · 🟡 60–79 · 🟠 40–59 · 🔴 &lt; 40</p>
+                        </div>
+                    </div>
+
+                    <div class="analysis-card">
+                        <h3>Revenue at Risk (qué significa aquí)</h3>
+                        <div class="analysis-content">
+                            <p><strong>Σ MRR</strong> de cuentas con <strong>Health Score &lt; 50</strong>.</p>
+                            <p style="margin-top:0.6rem;">Lectura: prioriza rescates por <strong>impacto (€)</strong> y <strong>urgencia</strong> (renovación próxima).</p>
+                        </div>
+                    </div>
+
+                    <div class="analysis-card">
+                        <h3>Segmento + Next Best Action (NBA)</h3>
+                        <div class="analysis-content">
+                            <p>Sirve para <strong>ordenar cartera</strong> y ejecutar una acción por cuenta.</p>
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                <li style="margin-bottom: 0.45rem;"><strong>High Value</strong> → QBR y expansión</li>
+                                <li style="margin-bottom: 0.45rem;"><strong>At Risk</strong> → plan de rescate 30 días</li>
+                                <li style="margin-bottom: 0.45rem;"><strong>Low Engagement</strong> → enablement/reactivación</li>
+                            </ul>
+                            <p style="margin-top:0.65rem;">Prioridad: <strong>urgente</strong> si renovación próxima + riesgo; si no, por soporte/adopción.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="summary-section">
+                <h2>🧩 Cómo usar (flujo recomendado)</h2>
+                <div class="global-analysis-container">
+                    <div class="analysis-card">
+                        <h3>1) Cargar datos</h3>
+                        <div class="analysis-content">
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                <li style="margin-bottom: 0.45rem;">📂 Carga Excel (Accounts / Period_Data / NPS_Data)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="analysis-card">
+                        <h3>2) Leer KPIs</h3>
+                        <div class="analysis-content">
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                <li style="margin-bottom: 0.45rem;">📊 Lee el estado global y ubica el <strong>Revenue at Risk</strong></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="analysis-card">
+                        <h3>3) Priorizar acciones</h3>
+                        <div class="analysis-content">
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                <li style="margin-bottom: 0.45rem;">✅ Ejecuta la <strong>NBA</strong> de cada cuenta empezando por impacto</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="summary-section">
+                <h2>📌 Definiciones de KPIs (qué mide y por qué importa)</h2>
+                <div class="global-analysis-container">
+                    <div class="analysis-card">
+                        <h3>💰 Revenue (MRR / ARR)</h3>
+                        <div class="analysis-content">
+                            <p>MRR/ARR explican <strong>tamaño e impacto</strong> de cada cuenta/cartera.</p>
+                            <p style="margin-top:0.5rem;">Decisión: priorización por € y planificación.</p>
+                        </div>
+                    </div>
+                    <div class="analysis-card">
+                        <h3>🔄 Retención (NRR / Churn)</h3>
+                        <div class="analysis-content">
+                            <p>NRR y churn explican si tu base instalada <strong>crece o se erosiona</strong>.</p>
+                            <p style="margin-top:0.5rem;">Decisión: ajustar estrategia (expansión vs rescate) y foco en drivers.</p>
+                        </div>
+                    </div>
+                    <div class="analysis-card">
+                        <h3>⭐ Señales cliente (NPS / Adoption / Risk)</h3>
+                        <div class="analysis-content">
+                            <p>NPS y adopción anticipan riesgo; Revenue at Risk traduce ese riesgo a <strong>€</strong>.</p>
+                            <p style="margin-top:0.5rem;">Decisión: activar enablement/rescate antes de la renovación.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="summary-section">
+                <h2>📐 Fórmulas (resumen)</h2>
+                <div class="global-analysis-container">
+                    <div class="analysis-card">
+                        <h3>Cheat sheet</h3>
+                        <div class="analysis-content">
+                            <p style="margin-bottom:0.45rem;"><strong>ARR</strong> = MRR × 12</p>
+                            <p style="margin-bottom:0.45rem;"><strong>NRR</strong> = (MRR_inicio + Expansión − Contracción − Churn) / MRR_inicio × 100</p>
+                            <p style="margin-bottom:0.45rem;"><strong>Churn</strong> = Clientes churn / Clientes al inicio × 100</p>
+                            <p style="margin-bottom:0.45rem;"><strong>NPS</strong> = %Promotores − %Detractores</p>
+                            <p style="margin-bottom:0.45rem;"><strong>Revenue at Risk</strong> = Σ(MRR de cuentas con Health Score &lt; 50)</p>
+                            <p style="margin-bottom:0.45rem;"><strong>Health</strong> = (Uso×0.30 + Adopción×0.25 + Tickets×0.25 + NPS×0.20) × 100</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="summary-section">
+                <h2>🧮 Metodología de Health Score</h2>
+                <div class="global-analysis-container">
+                    <div class="analysis-card">
+                        <h3>Niveles de riesgo</h3>
+                        <div class="analysis-content">
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                <li style="margin-bottom: 0.45rem;">🟢 80–100: Excelente</li>
+                                <li style="margin-bottom: 0.45rem;">🟡 60–79: Bueno</li>
+                                <li style="margin-bottom: 0.45rem;">🟠 40–59: En Riesgo</li>
+                                <li style="margin-bottom: 0.45rem;">🔴 0–39: Crítico</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="analysis-card">
+                        <h3>Qué hacer por nivel</h3>
+                        <div class="analysis-content">
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                <li style="margin-bottom: 0.45rem;">🔴 Crítico: reunión urgente + plan de rescate</li>
+                                <li style="margin-bottom: 0.45rem;">🟠 En riesgo: check-in proactivo + enablement</li>
+                                <li style="margin-bottom: 0.45rem;">🟡 Bueno: seguimiento y prevención</li>
+                                <li style="margin-bottom: 0.45rem;">🟢 Excelente: QBR y expansión</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="footer">
+                <p>Customer Success Analytics Platform © 2026</p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

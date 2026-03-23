@@ -17,10 +17,26 @@ let charts = {
     nrrQuarterly: null
 };
 
+const RENEWAL_SOON_DAYS = 90;
+
+let tableFilters = {
+    segment: 'all'
+};
+
 /* ===== EVENT LISTENERS ===== */
 document.addEventListener('DOMContentLoaded', () => {
     const fileInput = document.getElementById('excelFile');
     fileInput.addEventListener('change', handleFileUpload);
+
+    const segmentFilter = document.getElementById('segmentFilter');
+    if (segmentFilter) {
+        segmentFilter.addEventListener('change', () => {
+            tableFilters.segment = segmentFilter.value;
+            if (typeof renderAccountsTable === 'function') {
+                renderAccountsTable();
+            }
+        });
+    }
     
     // Inicializar sistema de ayuda y tooltips
     if (typeof initHelpSystem === 'function') {
@@ -43,8 +59,8 @@ function generateSampleNPSData() {
             let baseScore = 7; // Score medio por defecto
             
             // Si la cuenta tiene datos, ajustar el score base
-            if (account.Product_Usage_Percentage) {
-                const usage = parseFloat(account.Product_Usage_Percentage) || 50;
+            if (account.Product_Usage_Percentage || account.Product_Usage) {
+                const usage = parseFloat(account.Product_Usage_Percentage ?? account.Product_Usage) || 50;
                 if (usage > 70) baseScore = 8;
                 else if (usage < 40) baseScore = 5;
             }
@@ -254,7 +270,7 @@ function calculateNPS(npsRecords) {
 }
 
 function calculateHealthScore(account, periodData, npsData) {
-    const usageScore = (parseFloat(account.Product_Usage_Percentage) || 0) / 100;
+    const usageScore = (parseFloat(account.Product_Usage_Percentage ?? account.Product_Usage) || 0) / 100;
     const adoptionScore = (parseFloat(account.Active_Users) || 0) / (parseFloat(account.Total_Licenses) || 1);
     const ticketScore = Math.max(0, 1 - ((parseInt(account.Open_Tickets) || 0) * 0.05));
     
@@ -275,7 +291,7 @@ function calculateHealthScore(account, periodData, npsData) {
     return {
         score: Math.round(healthScore),
         components: {
-            usage: parseFloat(account.Product_Usage_Percentage) || 0,
+            usage: parseFloat(account.Product_Usage_Percentage ?? account.Product_Usage) || 0,
             adoption: Math.round(adoptionScore * 100),
             tickets: parseInt(account.Open_Tickets) || 0,
             nps: Math.round(avgNPS),
@@ -296,9 +312,233 @@ function getRiskLevel(healthScore) {
 function renderDashboard() {
     renderKPIs();
     renderGlobalAnalysis();
+    renderKeyInsights();
     renderRiskLevels();
     renderQuarterlyCharts();
     renderAccountsTable();
+}
+
+function parseExcelDate(value) {
+    if (!value && value !== 0) return null;
+    if (value instanceof Date) return value;
+    if (typeof value === 'string') {
+        const d = new Date(value);
+        return Number.isNaN(d.getTime()) ? null : d;
+    }
+    if (typeof value === 'number') {
+        // Excel serial date (days since 1899-12-30)
+        const epoch = new Date(Date.UTC(1899, 11, 30));
+        const ms = value * 24 * 60 * 60 * 1000;
+        const d = new Date(epoch.getTime() + ms);
+        return Number.isNaN(d.getTime()) ? null : d;
+    }
+    return null;
+}
+
+function getDaysUntil(date) {
+    if (!date) return null;
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const target = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const diffMs = target.getTime() - startOfToday.getTime();
+    return Math.round(diffMs / (24 * 60 * 60 * 1000));
+}
+
+function getAccountUsage(account) {
+    return parseFloat(account.Product_Usage_Percentage ?? account.Product_Usage) || 0;
+}
+
+function getAccountAdoptionPercent(account) {
+    const active = parseFloat(account.Active_Users) || 0;
+    const total = parseFloat(account.Total_Licenses) || 1;
+    return (active / total) * 100;
+}
+
+function getAverageAccountNPS(accountId) {
+    const rows = (excelData.npsData || []).filter(n => n.Account_ID === accountId);
+    if (!rows || rows.length === 0) return 0;
+    const avg = rows.reduce((sum, n) => sum + (parseInt(n.NPS_Response) || 0), 0) / rows.length;
+    return Math.round(avg);
+}
+
+function getHighValueMRRThreshold(accounts) {
+    const mrrs = (accounts || [])
+        .map(a => parseFloat(a.MRR_Current) || 0)
+        .filter(v => v > 0)
+        .sort((a, b) => a - b);
+    if (mrrs.length === 0) return Infinity;
+    const index = Math.floor(mrrs.length * 0.8);
+    return mrrs[Math.min(index, mrrs.length - 1)];
+}
+
+function segmentCustomer(account, highValueMRRThreshold) {
+    const usage = getAccountUsage(account);
+    const adoption = getAccountAdoptionPercent(account);
+    const tickets = parseInt(account.Open_Tickets) || 0;
+    const nps = getAverageAccountNPS(account.Account_ID);
+    const riskLevel = account.riskLevel || getRiskLevel(account.healthScore || 0);
+    const mrr = parseFloat(account.MRR_Current) || 0;
+
+    const isAtRisk = riskLevel === 'critical' || riskLevel === 'at-risk' || usage < 50 || adoption < 60 || tickets > 5 || nps < 0;
+    if (isAtRisk) return 'At Risk';
+
+    const isHighValue = mrr >= highValueMRRThreshold && (account.healthScore || 0) >= 80;
+    if (isHighValue) return 'High Value';
+
+    return 'Low Engagement';
+}
+
+function getSegmentBadgeClass(segment) {
+    if (segment === 'High Value') return 'high-value';
+    if (segment === 'At Risk') return 'at-risk';
+    return 'low-engagement';
+}
+
+function getNextBestAction(account, segment) {
+    const renewalDate = parseExcelDate(account.Renewal_Date);
+    const daysToRenewal = getDaysUntil(renewalDate);
+    const renewalSoon = daysToRenewal !== null && daysToRenewal >= 0 && daysToRenewal <= RENEWAL_SOON_DAYS;
+
+    const riskLevel = account.riskLevel || getRiskLevel(account.healthScore || 0);
+    const reasons = typeof getRiskReasons === 'function' ? getRiskReasons(account) : [];
+
+    if (renewalSoon && (riskLevel === 'critical' || riskLevel === 'at-risk')) {
+        return {
+            priority: 'urgent',
+            emoji: '🧯',
+            text: 'Plan de rescate + renovación',
+            why: `Renovación en ${daysToRenewal} días y cuenta en riesgo`
+        };
+    }
+
+    const tickets = parseInt(account.Open_Tickets) || 0;
+    const avgResolution = parseFloat(account.Avg_Resolution) || 0;
+    if (tickets > 5 || avgResolution >= 7) {
+        return {
+            priority: 'high',
+            emoji: '🎫',
+            text: 'Escalar soporte y mitigar',
+            why: 'Tickets altos o resolución lenta'
+        };
+    }
+
+    if (segment === 'At Risk') {
+        const topReason = reasons && reasons.length > 0 ? reasons[0].label : 'Drivers de salud'
+        return {
+            priority: 'high',
+            emoji: '📞',
+            text: 'Check-in ejecutivo + plan 30 días',
+            why: topReason
+        };
+    }
+
+    if (segment === 'Low Engagement') {
+        return {
+            priority: 'medium',
+            emoji: '🎓',
+            text: 'Enablement + reactivación',
+            why: 'Mejorar adopción y uso'
+        };
+    }
+
+    if (segment === 'High Value') {
+        return {
+            priority: 'medium',
+            emoji: '📈',
+            text: 'QBR + detectar expansión',
+            why: 'Alto impacto en revenue'
+        };
+    }
+
+    return {
+        priority: 'medium',
+        emoji: '✅',
+        text: 'Monitorizar',
+        why: 'Sin señales críticas'
+    };
+}
+
+function renderKeyInsights() {
+    const insightsEl = document.getElementById('keyInsights');
+    const nextStepsEl = document.getElementById('nextSteps');
+    if (!insightsEl || !nextStepsEl) return;
+
+    const accounts = calculatedMetrics.accountMetrics || [];
+    if (accounts.length === 0) {
+        insightsEl.innerHTML = '<p>📂 Carga un Excel para generar insights.</p>';
+        nextStepsEl.innerHTML = '<p>📂 Carga un Excel para proponer acciones.</p>';
+        return;
+    }
+
+    const totalMRR = accounts.reduce((sum, a) => sum + (parseFloat(a.MRR_Current) || 0), 0);
+    const riskAccounts = accounts.filter(a => a.riskLevel === 'critical' || a.riskLevel === 'at-risk');
+    const riskMRR = riskAccounts.reduce((sum, a) => sum + (parseFloat(a.MRR_Current) || 0), 0);
+    const riskPct = totalMRR > 0 ? (riskMRR / totalMRR) * 100 : 0;
+
+    const renewalSoonRisk = riskAccounts.filter(a => {
+        const d = getDaysUntil(parseExcelDate(a.Renewal_Date));
+        return d !== null && d >= 0 && d <= RENEWAL_SOON_DAYS;
+    });
+    const renewalSoonRiskMRR = renewalSoonRisk.reduce((sum, a) => sum + (parseFloat(a.MRR_Current) || 0), 0);
+
+    const highValueThreshold = getHighValueMRRThreshold(accounts);
+    let highValueMRR = 0;
+    let highValueCount = 0;
+
+    const driverCounts = {};
+    riskAccounts.forEach(a => {
+        const seg = segmentCustomer(a, highValueThreshold);
+        if (seg === 'High Value') {
+            highValueCount += 1;
+            highValueMRR += (parseFloat(a.MRR_Current) || 0);
+        }
+
+        const reasons = typeof getRiskReasons === 'function' ? getRiskReasons(a) : [];
+        reasons.slice(0, 3).forEach(r => {
+            const key = r.label || 'Driver';
+            driverCounts[key] = (driverCounts[key] || 0) + 1;
+        });
+    });
+
+    const topDrivers = Object.entries(driverCounts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 2)
+        .map(([label]) => label);
+
+    const highValueShare = totalMRR > 0 ? (highValueMRR / totalMRR) * 100 : 0;
+
+    const insights = [];
+    insights.push(`⚠️ <strong>${riskAccounts.length}</strong> cuentas en riesgo concentran <strong>${riskPct.toFixed(1)}%</strong> del MRR (${formatCurrency(riskMRR)}).`);
+    if (renewalSoonRisk.length > 0) {
+        insights.push(`🔄 Renovación en <strong>${RENEWAL_SOON_DAYS} días</strong> + riesgo: <strong>${renewalSoonRisk.length}</strong> cuentas, ${formatCurrency(renewalSoonRiskMRR)} en MRR.`);
+    }
+    if (topDrivers.length > 0) {
+        insights.push(`🧩 Drivers más frecuentes en cuentas en riesgo: <strong>${topDrivers.join('</strong> · <strong>')}</strong>.`);
+    }
+    if (highValueCount > 0) {
+        insights.push(`💎 High Value: <strong>${highValueCount}</strong> cuentas representan <strong>${highValueShare.toFixed(1)}%</strong> del MRR (${formatCurrency(highValueMRR)}).`);
+    }
+
+    insightsEl.innerHTML = `
+        <ul style="list-style:none; padding:0; margin:0;">
+            ${insights.map(i => `<li style="margin-bottom:0.75rem; line-height:1.6;">${i}</li>`).join('')}
+        </ul>
+    `;
+
+    const actions = [];
+    if (renewalSoonRisk.length > 0) {
+        actions.push('🧯 Prioriza renovaciones próximas en riesgo (plan de rescate + sponsor + propuesta).');
+    }
+    if (riskPct >= 15) {
+        actions.push('📞 Bloquea agenda con cuentas críticas: define plan 30 días y owners por driver.');
+    }
+    actions.push('🎓 Ejecuta enablement en Low Engagement (adopción + uso) y mide impacto en 2–4 semanas.');
+
+    nextStepsEl.innerHTML = `
+        <ul style="list-style:none; padding:0; margin:0;">
+            ${actions.slice(0, 3).map(a => `<li style="margin-bottom:0.75rem; line-height:1.6;">${a}</li>`).join('')}
+        </ul>
+    `;
 }
 
 function renderKPIs() {
@@ -928,26 +1168,53 @@ function renderQuarterlyCharts() {
 function renderAccountsTable() {
     const tbody = document.getElementById('accountsTableBody');
     tbody.innerHTML = '';
-    
-    calculatedMetrics.accountMetrics.forEach(account => {
+
+    const accounts = calculatedMetrics.accountMetrics || [];
+    const highValueThreshold = getHighValueMRRThreshold(accounts);
+
+    const filtered = accounts.filter(account => {
+        const segment = segmentCustomer(account, highValueThreshold);
+        account.segment = segment;
+        account.nextBestAction = getNextBestAction(account, segment);
+        if (tableFilters.segment && tableFilters.segment !== 'all') {
+            return segment === tableFilters.segment;
+        }
+        return true;
+    });
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="10" class="empty-state">
+                    🔎 No hay cuentas que cumplan el filtro seleccionado
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    filtered.forEach(account => {
         const row = document.createElement('tr');
-        
-        const adoptionRate = ((parseFloat(account.Active_Users) || 0) / (parseFloat(account.Total_Licenses) || 1)) * 100;
-        const accountNPS = excelData.npsData
-            .filter(n => n.Account_ID === account.Account_ID)
-            .reduce((sum, n, _, arr) => sum + parseInt(n.NPS_Response) / arr.length, 0);
-        
+
+        const adoptionRate = getAccountAdoptionPercent(account);
+        const accountNPS = getAverageAccountNPS(account.Account_ID);
+
+        const segment = account.segment || 'Low Engagement';
+        const segmentClass = getSegmentBadgeClass(segment);
+        const nba = account.nextBestAction || getNextBestAction(account, segment);
+
         const riskLabels = {
             'excellent': '🟢 Excelente',
             'good': '🟡 Bueno',
             'at-risk': '🟠 En Riesgo',
             'critical': '🔴 Crítico'
         };
-        
+
         row.innerHTML = `
             <td style="font-weight: 600;">${account.Account_Name}</td>
             <td>${formatCurrency(account.MRR_Current)}</td>
             <td>${formatCurrency(account.ARR_Current)}</td>
+            <td><span class="segment-badge ${segmentClass}">${segment}</span></td>
             <td>
                 <span style="font-weight: 600; color: ${getHealthScoreColor(account.healthScore)};">
                     ${account.healthScore}
@@ -956,6 +1223,10 @@ function renderAccountsTable() {
             <td>${adoptionRate.toFixed(0)}%</td>
             <td>${Math.round(accountNPS)}</td>
             <td><span class="risk-level ${account.riskLevel}">${riskLabels[account.riskLevel]}</span></td>
+            <td>
+                <span class="nba-badge ${nba.priority}">${nba.emoji} ${nba.text}</span>
+                <small>${nba.why}</small>
+            </td>
             <td>${account.CSM_Name}</td>
         `;
         tbody.appendChild(row);

@@ -28,6 +28,178 @@
         white   : [255, 255, 255],
     };
 
+    const RENEWAL_SOON_DAYS = 90;
+
+    function clamp(n, min, max) {
+        const v = Number.isFinite(n) ? n : 0;
+        return Math.min(max, Math.max(min, v));
+    }
+
+    function parseExcelDate(value) {
+        if (!value && value !== 0) return null;
+        if (value instanceof Date && !Number.isNaN(value.getTime())) return value;
+
+        // Excel serial date
+        if (typeof value === 'number' && Number.isFinite(value)) {
+            // Excel epoch starts at 1899-12-30
+            const epoch = new Date(Date.UTC(1899, 11, 30));
+            const ms = Math.round(value * 86400000);
+            const d = new Date(epoch.getTime() + ms);
+            return Number.isNaN(d.getTime()) ? null : d;
+        }
+
+        // Strings
+        if (typeof value === 'string') {
+            const s = value.trim();
+            if (!s) return null;
+            // Try ISO-like first
+            const iso = new Date(s);
+            if (!Number.isNaN(iso.getTime())) return iso;
+
+            // Try DD/MM/YYYY or DD-MM-YYYY
+            const m = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})$/);
+            if (m) {
+                const dd = parseInt(m[1], 10);
+                const mm = parseInt(m[2], 10);
+                let yy = parseInt(m[3], 10);
+                if (yy < 100) yy += 2000;
+                const d = new Date(yy, mm - 1, dd);
+                return Number.isNaN(d.getTime()) ? null : d;
+            }
+        }
+
+        return null;
+    }
+
+    function getDaysUntil(date, now) {
+        const d = parseExcelDate(date);
+        if (!d) return null;
+        const today = now instanceof Date ? now : new Date();
+        const start = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const end = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        const diff = end.getTime() - start.getTime();
+        return Math.round(diff / 86400000);
+    }
+
+    function getHighValueMRRThreshold(accounts) {
+        const mrrs = (accounts || [])
+            .map(a => parseFloat(a.MRR_Current) || 0)
+            .filter(v => v > 0)
+            .sort((a, b) => a - b);
+        if (mrrs.length === 0) return 0;
+        // Top 20% threshold
+        const idx = Math.floor(mrrs.length * 0.8);
+        return mrrs[clamp(idx, 0, mrrs.length - 1)];
+    }
+
+    function segmentCustomerFallback(account, highValueMRRThreshold) {
+        const hs = parseFloat(account.healthScore) || 0;
+        const usage = (account.healthComponents && account.healthComponents.usage) || parseFloat(account.Product_Usage_Percentage ?? account.Product_Usage) || 0;
+        const adoption = (account.healthComponents && account.healthComponents.adoption) || 0;
+        const mrr = parseFloat(account.MRR_Current) || 0;
+
+        if (hs < 60) return 'At Risk';
+        if (mrr >= (highValueMRRThreshold || 0) && highValueMRRThreshold > 0) return 'High Value';
+        if (usage < 40 || adoption < 40) return 'Low Engagement';
+        return 'Standard';
+    }
+
+    function getNextBestActionFallback(account, segment, today) {
+        const hs = parseFloat(account.healthScore) || 0;
+        const usage = (account.healthComponents && account.healthComponents.usage) || parseFloat(account.Product_Usage_Percentage ?? account.Product_Usage) || 0;
+        const adoption = (account.healthComponents && account.healthComponents.adoption) || 0;
+        const tickets = (account.healthComponents && account.healthComponents.tickets != null)
+            ? account.healthComponents.tickets
+            : (parseInt(account.Open_Tickets) || 0);
+        const daysToRenewal = getDaysUntil(account.Renewal_Date, today);
+
+        // 1) Renewal soon + risk
+        if (daysToRenewal != null && daysToRenewal >= 0 && daysToRenewal <= RENEWAL_SOON_DAYS && hs < 60) {
+            return {
+                title: 'Plan de rescate + preparación de renovación',
+                why: `Renovación en ${daysToRenewal} días y Health Score ${hs}/100.`,
+                priority: 'urgent'
+            };
+        }
+
+        // 2) Support friction
+        if (tickets >= 6) {
+            return {
+                title: 'Escalar soporte y cerrar bloqueos',
+                why: `${tickets} tickets abiertos están erosionando la experiencia.`,
+                priority: hs < 50 ? 'high' : 'medium'
+            };
+        }
+
+        // 3) Segment-driven
+        if (segment === 'Low Engagement' && (usage < 45 || adoption < 45)) {
+            return {
+                title: 'Re-onboarding + Quick Win (30 días)',
+                why: `Uso ${usage}% / adopción ${adoption}%. Enfocar en 1 caso de uso crítico.`,
+                priority: 'medium'
+            };
+        }
+        if (segment === 'High Value') {
+            return {
+                title: 'QBR + roadmap de valor (60-90 días)',
+                why: 'Blindar la cuenta con plan de valor, stakeholders y expansión controlada.',
+                priority: 'medium'
+            };
+        }
+        if (segment === 'At Risk') {
+            return {
+                title: 'Check-in semanal + plan de estabilización',
+                why: `Health Score ${hs}/100: alinear objetivos, bloquear riesgos y medir progreso.`,
+                priority: hs < 50 ? 'high' : 'medium'
+            };
+        }
+
+        return {
+            title: 'Revisión trimestral de valor',
+            why: 'Mantener cadencia, detectar señales tempranas y documentar ROI.',
+            priority: 'low'
+        };
+    }
+
+    function enrichSegmentationAndNBA(accountMetrics, allAccounts, today) {
+        const threshold = getHighValueMRRThreshold(allAccounts);
+        accountMetrics.forEach(am => {
+            const seg = (typeof window.segmentCustomer === 'function')
+                ? window.segmentCustomer(am, threshold)
+                : segmentCustomerFallback(am, threshold);
+            am.csSegment = seg;
+
+            const nba = (typeof window.getNextBestAction === 'function')
+                ? window.getNextBestAction(am, seg)
+                : getNextBestActionFallback(am, seg, today);
+            am.nextBestAction = nba;
+        });
+        return threshold;
+    }
+
+    function computeTopRiskDrivers(accountMetrics) {
+        const counts = {
+            'Uso bajo (<40%)': 0,
+            'Adopción baja (<40%)': 0,
+            'Tickets altos (>5)': 0,
+            'NPS bajo (<6/10)': 0,
+        };
+
+        (accountMetrics || []).forEach(a => {
+            const c = a.healthComponents || {};
+            if ((c.usage || 0) < 40) counts['Uso bajo (<40%)']++;
+            if ((c.adoption || 0) < 40) counts['Adopción baja (<40%)']++;
+            if ((c.tickets || 0) > 5) counts['Tickets altos (>5)']++;
+            if ((c.nps || 0) < 6) counts['NPS bajo (<6/10)']++;
+        });
+
+        return Object.entries(counts)
+            .sort((a, b) => b[1] - a[1])
+            .filter(([, n]) => n > 0)
+            .slice(0, 2)
+            .map(([label, n]) => ({ label, n }));
+    }
+
     /* ── CÓMPUTO DE MÉTRICAS POR AÑO (funciona sin calculatedMetrics) ─────── */
     function computeYearMetrics(data) {
         const byYear = {};
@@ -68,7 +240,7 @@
         return data.accounts.map(account => {
             const accP   = data.periodData.filter(p => p.Account_ID === account.Account_ID);
             const accNPS = data.npsData.filter(n => n.Account_ID === account.Account_ID);
-            const usage    = parseFloat(account.Product_Usage_Percentage) || 0;
+            const usage    = parseFloat(account.Product_Usage_Percentage ?? account.Product_Usage) || 0;
             const adoption = (parseFloat(account.Active_Users) || 0) / (parseFloat(account.Total_Licenses) || 1);
             const tickets  = parseInt(account.Open_Tickets) || 0;
             let npsScore = 0.5;
@@ -271,6 +443,9 @@
         const atRisk         = accountMetrics.filter(a => a.healthScore < 60);
         const anchorProfiles = computeAnchorProfiles(data);
 
+        // Enriquecer con Segmentación + Next Best Action para incluirlo en el PDF.
+        enrichSegmentationAndNBA(accountMetrics, data.accounts, today);
+
         // KPIs de portada
         const cm = (typeof calculatedMetrics !== 'undefined' ? calculatedMetrics : null);
         let kpis  = {};
@@ -443,7 +618,65 @@
         });
 
         // ── Cuentas Analizadas ────────────────────────────────────────────────
-        let yAcc = yKpi + 2 * (bH + 3) + 10;
+        // ── Business Purpose + Lectura Ejecutiva (bloque nuevo) ───────────────
+        const totalMRR = accountMetrics.reduce((s, a) => s + (parseFloat(a.MRR_Current) || 0), 0);
+        const mrrRisk = atRisk.reduce((s, a) => s + (parseFloat(a.MRR_Current) || 0), 0);
+        const mrrRiskPct = totalMRR > 0 ? (mrrRisk / totalMRR) * 100 : 0;
+        const renewSoonAtRisk = atRisk.filter(a => {
+            const d = getDaysUntil(a.Renewal_Date, today);
+            return d != null && d >= 0 && d <= RENEWAL_SOON_DAYS;
+        });
+        const topDrivers = computeTopRiskDrivers(atRisk);
+        const highValue = accountMetrics.filter(a => a.csSegment === 'High Value');
+        const hvMRR = highValue.reduce((s, a) => s + (parseFloat(a.MRR_Current) || 0), 0);
+        const hvMRRPct = totalMRR > 0 ? (hvMRR / totalMRR) * 100 : 0;
+
+        const execBullets = [
+            'Objetivo: monitorizar salud, anticipar churn y priorizar acciones de impacto por cuenta.',
+            `Riesgo actual: ${atRisk.length} cuentas en riesgo - ${fmtCurrency(mrrRisk)} (${fmtPct(mrrRiskPct)} del MRR).`,
+            renewSoonAtRisk.length > 0
+                ? `Renovación próxima (<=${RENEWAL_SOON_DAYS} días): ${renewSoonAtRisk.length} cuentas en riesgo requieren plan de rescate y preparación de renovación.`
+                : `Renovación próxima (<=${RENEWAL_SOON_DAYS} días): no se detectan cuentas en riesgo con renovación inmediata.`,
+            topDrivers.length
+                ? `Drivers principales: ${topDrivers.map(d => `${d.label} (${d.n})`).join(' / ')}.`
+                : 'Drivers principales: no hay señales dominantes (riesgo distribuido).',
+            highValue.length > 0
+                ? `High Value: ${highValue.length} cuentas representan ${fmtCurrency(hvMRR)} (${fmtPct(hvMRRPct)} del MRR) - proteger con QBR/roadmap y control de riesgos.`
+                : null,
+        ].filter(Boolean);
+
+        const yExec = yKpi + 2 * (bH + 3) + 6;
+        // Importante: calcular el wrapping con la misma fuente que el texto (evita desbordes)
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        const bulletLines = [];
+        execBullets.forEach(b => {
+            const lines = doc.splitTextToSize('- ' + b, CW - 14);
+            bulletLines.push(lines);
+        });
+        const execH = 10 + bulletLines.reduce((s, lines) => s + lines.length * 4.2, 0) + 6;
+
+        doc.setFillColor(240, 249, 255);
+        doc.roundedRect(M, yExec, CW, execH, 4, 4, 'F');
+        doc.setFillColor(...COLORS.primary);
+        doc.roundedRect(M, yExec, 1.8, execH, 1, 1, 'F');
+
+        doc.setTextColor(...COLORS.dark);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8);
+        doc.text('BUSINESS PURPOSE · LECTURA EJECUTIVA', M + 6, yExec + 8);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(...COLORS.dark);
+        let yBul = yExec + 14;
+        bulletLines.forEach(lines => {
+            doc.text(lines, M + 7, yBul);
+            yBul += lines.length * 4.2;
+        });
+
+        // ── Cuentas Analizadas ────────────────────────────────────────────────
+        let yAcc = yExec + execH + 10;
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(7);
         doc.setTextColor(...COLORS.muted);
@@ -672,12 +905,14 @@
 
             if (atRisk.length === 0) {
                 doc.setFont('helvetica','italic'); doc.setFontSize(10); doc.setTextColor(...COLORS.muted);
-                doc.text('No se han detectado cuentas en riesgo. Todas las cuentas tienen Health Score ≥ 60.', M, 45);
+                doc.text('No se han detectado cuentas en riesgo. Todas las cuentas tienen Health Score >= 60.', M, 45);
             } else {
+                const sortedAtRisk = atRisk.slice().sort((a, b) => a.healthScore - b.healthScore);
+
                 // Summary badges
-                const critN    = atRisk.filter(a=>a.healthScore<40).length;
-                const atRiskN  = atRisk.filter(a=>a.healthScore>=40&&a.healthScore<60).length;
-                const mrrRisk  = atRisk.reduce((s,a)=>s+(parseFloat(a.MRR_Current)||0),0);
+                const critN    = sortedAtRisk.filter(a=>a.healthScore<40).length;
+                const atRiskN  = sortedAtRisk.filter(a=>a.healthScore>=40&&a.healthScore<60).length;
+                const mrrRisk  = sortedAtRisk.reduce((s,a)=>s+(parseFloat(a.MRR_Current)||0),0);
                 const fmtS     = v => v>=1000000?(v/1000000).toFixed(1)+'M €':v>=1000?Math.round(v/1000)+'K €':Math.round(v)+' €';
                 const badges   = [
                     {label:'Cuentas Críticas (<40)',  value:String(critN),     color:COLORS.danger},
@@ -707,20 +942,38 @@
                     return f.length ? f.join(' · ') : 'Revisión preventiva';
                 };
                 const action = a => {
+                    const nba = a.nextBestAction;
+                    if (nba && nba.title) {
+                        const why = nba.why ? (' — ' + nba.why) : '';
+                        return (nba.title + why).trim();
+                    }
                     const hs=a.healthScore;
                     if (hs<40) return 'Llamada ejecutiva urgente (48h) · Escalada interna · War room técnica si >5 tickets';
                     if (hs<50) return 'Check-in semanal · Sesión formación · Revisión tickets · Entrevista NPS 1:1';
                     return 'Seguimiento proactivo · Identificar quick win 30 días · Mapear expansión';
                 };
-                const priority = a => a.healthScore<40?'Urgente':a.healthScore<50?'Alta':'Media';
-                const prioColor = a => a.healthScore<40?COLORS.danger:a.healthScore<50?COLORS.orange:COLORS.warning;
+                const priority = a => {
+                    const p = a.nextBestAction && a.nextBestAction.priority;
+                    if (p === 'urgent') return 'Urgente';
+                    if (p === 'high') return 'Alta';
+                    if (p === 'medium') return 'Media';
+                    if (p === 'low') return 'Baja';
+                    return a.healthScore<40?'Urgente':a.healthScore<50?'Alta':'Media';
+                };
+                const prioColor = a => {
+                    const p = a.nextBestAction && a.nextBestAction.priority;
+                    if (p === 'urgent') return COLORS.danger;
+                    if (p === 'high') return COLORS.orange;
+                    if (p === 'medium') return COLORS.warning;
+                    return a.healthScore<40?COLORS.danger:a.healthScore<50?COLORS.orange:COLORS.warning;
+                };
 
                 doc.autoTable({
                     startY: 56,
                     head:[['Cuenta','Segmento','Health','MRR','Factores de Riesgo','Acciones Recomendadas','Prioridad']],
-                    body: atRisk.sort((a,b)=>a.healthScore-b.healthScore).map(a=>[
+                    body: sortedAtRisk.map(a=>[
                         a.Account_Name||a.Account_ID,
-                        a.Segment||a.Type||'—',
+                        a.csSegment || a.Segment || a.Type || '—',
                         String(a.healthScore)+'/100',
                         fmtS(parseFloat(a.MRR_Current)||0),
                         factors(a),
@@ -741,7 +994,7 @@
                     },
                     didDrawCell: (data) => {
                         if (data.column.index===6 && data.section==='body') {
-                            const acc = atRisk.sort((a,b)=>a.healthScore-b.healthScore)[data.row.index];
+                            const acc = sortedAtRisk[data.row.index];
                             if (acc) {
                                 const col = prioColor(acc);
                                 doc.setFillColor(...col);
@@ -868,8 +1121,23 @@
             const metrLines = doc.splitTextToSize(metrLine, CW - 12);
             doc.text(metrLines, M + 8, 47);
 
+            // Segmentación + Next Best Action
+            const segLabel = account.csSegment ? `Segmentación: ${account.csSegment}` : null;
+            const nba = account.nextBestAction;
+            const nbaLabel = nba && nba.title ? `Next Best Action: ${nba.title}` : null;
+            const extra = [segLabel, nbaLabel].filter(Boolean).join('   |   ');
+            let yAfterMetr = 47 + (metrLines.length * 4.2);
+            if (extra) {
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(8);
+                doc.setTextColor(...COLORS.dark);
+                const extraLines = doc.splitTextToSize(extra, CW - 12);
+                doc.text(extraLines, M + 8, yAfterMetr + 6);
+                yAfterMetr += extraLines.length * 4.2 + 6;
+            }
+
             // ── Secciones metodologicas ──────────────────────────────────────
-            let yPos = 64;
+            let yPos = Math.max(64, yAfterMetr + 11);
             plan.forEach(section => {
                 yPos = _sectionBlock(doc, PW, M, CW, PH, yPos, section.title, section.color, section.items);
                 yPos += 5;
@@ -950,7 +1218,7 @@
 
         const legend = [
             { color: COLORS.primary,  name: 'Azul',    use: 'KPIs principales, cabeceras de tabla y secciones de navegacion' },
-            { color: COLORS.success,  name: 'Verde',   use: 'Resultados positivos y cuentas en estado Excelente (Health ≥ 80)' },
+            { color: COLORS.success,  name: 'Verde',   use: 'Resultados positivos y cuentas en estado Excelente (Health >= 80)' },
             { color: [251, 191, 36],  name: 'Amarillo',use: 'Cuentas en estado Bueno (Health 60-79), advertencias leves' },
             { color: COLORS.orange,   name: 'Naranja', use: 'Cuentas En Riesgo (Health 40-59), atencion recomendada' },
             { color: COLORS.danger,   name: 'Rojo',    use: 'Cuentas en estado Crítico (Health < 40), acción urgente' },

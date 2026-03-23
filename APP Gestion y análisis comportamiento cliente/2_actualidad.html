@@ -84,25 +84,43 @@
                     <span class="sidebar-nav-text">Inicio</span>
                 </a>
             </div>
-            <div class="sidebar-nav-item">
-                <a href="1_historial.html" class="sidebar-nav-link" title="Historial 10 Años">
-                    <span class="sidebar-nav-icon">📈</span>
-                    <span class="sidebar-nav-text">Historial</span>
-                </a>
+            <div class="sidebar-nav-section">
+                <div class="sidebar-section-title">Marco consultivo</div>
+                <div class="sidebar-nav-item">
+                    <a href="business_purpose.html" class="sidebar-nav-link" title="Business Purpose y metodología">
+                        <span class="sidebar-nav-icon">🧭</span>
+                        <span class="sidebar-nav-text">Business Purpose</span>
+                    </a>
+                </div>
             </div>
-            <div class="sidebar-nav-item">
-                <a href="2_actualidad.html" class="sidebar-nav-link active" title="Actualidad 2026">
-                    <span class="sidebar-nav-icon">⚡</span>
-                    <span class="sidebar-nav-text">Actualidad</span>
-                </a>
-            </div>
-            <div class="sidebar-nav-item">
-                <a href="3_tendencias.html" class="sidebar-nav-link" title="Tendencias 2027">
-                    <span class="sidebar-nav-icon">📉</span>
-                    <span class="sidebar-nav-text">Tendencias</span>
-                </a>
+
+            <div class="sidebar-nav-section">
+                <div class="sidebar-section-title">Escenarios de análisis</div>
+                <div class="sidebar-submenu">
+                    <div class="sidebar-nav-item">
+                        <a href="1_historial.html" class="sidebar-nav-link" title="Historial 10 Años">
+                            <span class="sidebar-nav-icon">📈</span>
+                            <span class="sidebar-nav-text">Historial</span>
+                        </a>
+                    </div>
+                    <div class="sidebar-nav-item">
+                        <a href="2_actualidad.html" class="sidebar-nav-link active" title="Actualidad 2026">
+                            <span class="sidebar-nav-icon">⚡</span>
+                            <span class="sidebar-nav-text">Actualidad</span>
+                        </a>
+                    </div>
+                    <div class="sidebar-nav-item">
+                        <a href="3_tendencias.html" class="sidebar-nav-link" title="Tendencias 2027">
+                            <span class="sidebar-nav-icon">📉</span>
+                            <span class="sidebar-nav-text">Tendencias</span>
+                        </a>
+                    </div>
+                </div>
             </div>
         </nav>
+        <div class="sidebar-nav-section">
+            <div class="sidebar-section-title">Informe completo</div>
+        </div>
         <div class="sidebar-pdf-wrapper">
             <button class="sidebar-pdf-btn" onclick="generatePDFReport()" title="Descargar informe PDF con análisis completo">
                 <span class="sidebar-pdf-btn-icon">📄</span>
@@ -134,6 +152,13 @@
                 Dashboard Customer Success
             </div>
             <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="business_purpose.html" class="nav-link">
+                        <span class="nav-icon">🧭</span>
+                        Business Purpose
+                    </a>
+                </li>
+                <li class="nav-item nav-divider" aria-hidden="true"></li>
                 <li class="nav-item">
                     <a href="1_historial.html" class="nav-link">
                         <span class="nav-icon">📈</span>
@@ -203,6 +228,18 @@
             <h1>📍 Estado Actual (2026)</h1>
             <p>Snapshot del año en curso y métricas en tiempo real</p>
         </header>
+
+        <!-- CONTEXTO / BUSINESS PURPOSE -->
+        <section class="context-box">
+            <h2>🧭 Customer Health Dashboard — Business Purpose</h2>
+            <p>
+                Herramienta de <strong>Customer Analytics</strong> para monitorizar la salud del cliente, detectar riesgo de churn y
+                generar <strong>insights accionables</strong> para priorizar acciones (retención, reactivación y expansión).
+            </p>
+            <div class="context-actions">
+                <a class="context-link" href="business_purpose.html">Ver metodología, definiciones y playbooks →</a>
+            </div>
+        </section>
 
         <!-- MÉTRICAS PRINCIPALES -->
         <section class="summary-section">
@@ -289,6 +326,25 @@
                     <h3>⚠️ Alertas y Recomendaciones</h3>
                     <div class="analysis-content" id="alertsRecommendations">
                         <p>Cargando alertas...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- KEY INSIGHTS (STORYTELLING) -->
+        <section class="summary-section">
+            <h2>🧠 Key Insights (Lectura Ejecutiva)</h2>
+            <div class="global-analysis-container">
+                <div class="analysis-card">
+                    <h3>📌 Insights principales</h3>
+                    <div class="analysis-content" id="keyInsights">
+                        <p>Cargando insights...</p>
+                    </div>
+                </div>
+                <div class="analysis-card">
+                    <h3>✅ Qué hacer ahora</h3>
+                    <div class="analysis-content" id="nextSteps">
+                        <p>Generando acciones...</p>
                     </div>
                 </div>
             </div>
@@ -402,6 +458,17 @@
                 📋 Detalle de Cuentas Activas
                 <span class="info-icon" data-tooltip="Vista detallada de todas las cuentas con sus métricas de salud y asignación de CSM">?</span>
             </h2>
+            <div class="table-filters" aria-label="Filtros de tabla">
+                <div class="table-filter">
+                    <label for="segmentFilter">Segmento</label>
+                    <select id="segmentFilter">
+                        <option value="all">Todos</option>
+                        <option value="High Value">High Value</option>
+                        <option value="At Risk">At Risk</option>
+                        <option value="Low Engagement">Low Engagement</option>
+                    </select>
+                </div>
+            </div>
             <div class="table-wrapper">
                 <table class="data-table">
                     <thead>
@@ -409,16 +476,18 @@
                             <th>Cuenta <span class="info-icon" data-tooltip="Nombre del cliente">?</span></th>
                             <th>MRR <span class="info-icon" data-tooltip="Ingresos mensuales recurrentes">?</span></th>
                             <th>ARR <span class="info-icon" data-tooltip="Proyección anual (MRR×12)">?</span></th>
+                            <th>Segmento <span class="info-icon" data-tooltip="Clasificación automática para priorización consultiva">?</span></th>
                             <th>Health Score <span class="info-icon" data-tooltip="Puntuación de salud 0-100">?</span></th>
                             <th>Adopción <span class="info-icon" data-tooltip="% de usuarios activos vs licencias">?</span></th>
                             <th>NPS <span class="info-icon" data-tooltip="Puntuación de lealtad -100 a +100">?</span></th>
                             <th>Riesgo <span class="info-icon" data-tooltip="Nivel de riesgo basado en Health Score">?</span></th>
+                            <th>Next Best Action <span class="info-icon" data-tooltip="Recomendación prioritaria por cuenta">?</span></th>
                             <th>CSM <span class="info-icon" data-tooltip="Customer Success Manager asignado">?</span></th>
                         </tr>
                     </thead>
                     <tbody id="accountsTableBody">
                         <tr>
-                            <td colspan="8" class="empty-state">
+                            <td colspan="10" class="empty-state">
                                 📂 Carga un archivo Excel para ver las cuentas activas
                             </td>
                         </tr>
